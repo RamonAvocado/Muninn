@@ -216,3 +216,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Node / Next.js
+node_modules/
+.next/
+next-env.d.ts
+.env*.local
+
+# SQLite (local app data)
+sqlite.db
+sqlite.db-journal
+*.db-shm
+*.db-wal
