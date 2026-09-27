@@ -5,6 +5,15 @@ import { eq } from "drizzle-orm";
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const body = await req.json();
+
+  const existing =
+    body.status !== undefined
+      ? await db.query.todos.findFirst({
+          where: eq(todos.id, Number(id)),
+          with: { project: true },
+        })
+      : undefined;
+
   const [row] = await db
     .update(todos)
     .set({
@@ -14,6 +23,29 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     })
     .where(eq(todos.id, Number(id)))
     .returning();
+
+  if (
+    existing?.githubIssueNumber &&
+    existing.project?.githubOwner &&
+    existing.project?.githubRepo
+  ) {
+    try {
+      await fetch(
+        `https://api.github.com/repos/${existing.project.githubOwner}/${existing.project.githubRepo}/issues/${existing.githubIssueNumber}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+            Accept: "application/vnd.github+json",
+          },
+          body: JSON.stringify({ state: body.status === "done" ? "closed" : "open" }),
+        },
+      );
+    } catch {
+      // best-effort: local status already updated, ignore GitHub sync failures
+    }
+  }
+
   return Response.json(row);
 }
 

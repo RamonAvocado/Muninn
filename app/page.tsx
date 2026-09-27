@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { TodoCheckbox } from "@/components/todo-checkbox";
 import { QuickAddTodo } from "@/components/quick-add-todo";
 import { NewTodoDialog } from "@/components/new-todo-dialog";
+import { IdeaItem } from "@/components/idea-item";
 
 export default async function DashboardPage() {
   const [openLifeTodos, recentDone, recentIdeas] = await Promise.all([
@@ -84,9 +85,7 @@ export default async function DashboardPage() {
             </p>
           )}
           {recentIdeas.map((i) => (
-            <div key={i.id} className="text-sm">
-              {i.title}
-            </div>
+            <IdeaItem key={i.id} title={i.title} body={i.body} />
           ))}
         </CardContent>
       </Card>

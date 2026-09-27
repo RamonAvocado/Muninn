@@ -8,6 +8,7 @@ import { TodoCheckbox } from "@/components/todo-checkbox";
 import { QuickAddTodo } from "@/components/quick-add-todo";
 import { NewTodoDialog } from "@/components/new-todo-dialog";
 import { SyncButton } from "@/components/sync-button";
+import { ProjectLabelsSection } from "@/components/project-labels-section";
 import { PushIssueButton } from "@/components/push-issue-button";
 import { DeleteButton } from "@/components/delete-button";
 
@@ -30,7 +31,20 @@ export default async function ProjectPage({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">{project.name}</h1>
+        <h1 className="text-xl font-semibold">
+          {project.githubOwner && project.githubRepo ? (
+            <a
+              href={`https://github.com/${project.githubOwner}/${project.githubRepo}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline"
+            >
+              {project.name}
+            </a>
+          ) : (
+            project.name
+          )}
+        </h1>
         {project.githubOwner && project.githubRepo && (
           <SyncButton projectId={project.id} />
         )}
@@ -102,6 +116,18 @@ export default async function ProjectPage({
               )}
             </div>
           ))}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Labels</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ProjectLabelsSection
+            projectId={project.id}
+            canSync={!!(project.githubOwner && project.githubRepo)}
+          />
         </CardContent>
       </Card>
     </div>

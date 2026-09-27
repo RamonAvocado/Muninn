@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -21,7 +22,25 @@ export function NewTodoDialog({ projectId }: { projectId?: number }) {
   const [pending, setPending] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [labels, setLabels] = useState("");
+  const [available, setAvailable] = useState<{ name: string }[]>([]);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!open) return;
+    const url = projectId ? `/api/projects/${projectId}/labels?resolved=1` : "/api/labels/personal";
+    fetch(url)
+      .then((res) => res.json())
+      .then(setAvailable);
+  }, [open, projectId]);
+
+  function toggleLabel(name: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -30,11 +49,16 @@ export function NewTodoDialog({ projectId }: { projectId?: number }) {
     await fetch("/api/todos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, projectId, description, labels }),
+      body: JSON.stringify({
+        title,
+        projectId,
+        description,
+        labels: Array.from(selected).join(","),
+      }),
     });
     setTitle("");
     setDescription("");
-    setLabels("");
+    setSelected(new Set());
     setPending(false);
     setOpen(false);
     router.refresh();
@@ -61,11 +85,19 @@ export function NewTodoDialog({ projectId }: { projectId?: number }) {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Description (optional)"
           />
-          <Input
-            value={labels}
-            onChange={(e) => setLabels(e.target.value)}
-            placeholder="Labels (optional), e.g. bug, ui, backend"
-          />
+          {available.length > 0 && (
+            <div className="flex flex-col gap-1.5">
+              {available.map((label) => (
+                <label key={label.name} className="flex items-center gap-2 text-sm">
+                  <Checkbox
+                    checked={selected.has(label.name)}
+                    onCheckedChange={() => toggleLabel(label.name)}
+                  />
+                  {label.name}
+                </label>
+              ))}
+            </div>
+          )}
           <DialogFooter>
             <Button type="submit" disabled={pending}>
               Create

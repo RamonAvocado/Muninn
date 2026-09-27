@@ -1,9 +1,10 @@
 import { db } from "@/db";
 import { ideas } from "@/db/schema";
 import { desc } from "drizzle-orm";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { NewIdeaForm } from "@/components/new-idea-form";
 import { DeleteButton } from "@/components/delete-button";
+import { IdeaItem } from "@/components/idea-item";
 
 export default async function IdeasPage() {
   const rows = await db.select().from(ideas).orderBy(desc(ideas.createdAt));
@@ -24,15 +25,10 @@ export default async function IdeasPage() {
         )}
         {rows.map((idea) => (
           <Card key={idea.id}>
-            <CardHeader className="flex flex-row items-start justify-between">
-              <CardTitle>{idea.title}</CardTitle>
+            <CardContent className="flex flex-row items-start justify-between gap-2 pt-6">
+              <IdeaItem title={idea.title} body={idea.body} className="flex-1" />
               <DeleteButton url={`/api/ideas/${idea.id}`} />
-            </CardHeader>
-            {idea.body && (
-              <CardContent className="text-sm text-muted-foreground whitespace-pre-wrap">
-                {idea.body}
-              </CardContent>
-            )}
+            </CardContent>
           </Card>
         ))}
       </div>

@@ -44,6 +44,33 @@ export const ideas = sqliteTable("ideas", {
     .default(sql`(unixepoch())`),
 });
 
+export const personalLabels = sqliteTable("personal_labels", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull().unique(),
+  color: text("color"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
+export const projectLabels = sqliteTable(
+  "project_labels",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    projectId: integer("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    color: text("color"),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (t) => ({
+    projectNameUnique: uniqueIndex("project_labels_project_name_unique").on(t.projectId, t.name),
+  }),
+);
+
 export const projectsRelations = relations(projects, ({ many }) => ({
   todos: many(todos),
 }));

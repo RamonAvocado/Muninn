@@ -15,6 +15,13 @@
       "when": 1790415623267,
       "tag": "0001_amused_madame_hydra",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1790497144098,
+      "tag": "0002_complex_power_man",
+      "breakpoints": true
     }
   ]
 }
