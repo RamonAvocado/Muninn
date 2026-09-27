@@ -17,6 +17,8 @@ export const todos = sqliteTable(
     id: integer("id").primaryKey({ autoIncrement: true }),
     projectId: integer("project_id").references(() => projects.id, { onDelete: "cascade" }),
     title: text("title").notNull(),
+    description: text("description"),
+    labels: text("labels"),
     status: text("status", { enum: ["todo", "done"] }).notNull().default("todo"),
     source: text("source", { enum: ["manual", "github"] }).notNull().default("manual"),
     githubIssueNumber: integer("github_issue_number"),

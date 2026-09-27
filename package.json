@@ -3,10 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "bun run db:migrate",
     "dev": "next dev",
+    "prebuild": "bun run db:migrate",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "bun run scripts/migrate.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

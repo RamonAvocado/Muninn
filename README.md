@@ -2,6 +2,8 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+The local SQLite database (`sqlite.db`) and its schema are managed with [Drizzle ORM](https://orm.drizzle.team). Migrations run automatically before `dev`/`build`, so no manual DB setup is needed on a fresh clone.
+
 First, run the development server:
 
 ```bash

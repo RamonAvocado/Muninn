@@ -3,8 +3,10 @@ import { todos, ideas } from "@/db/schema";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { TodoCheckbox } from "@/components/todo-checkbox";
 import { QuickAddTodo } from "@/components/quick-add-todo";
+import { NewTodoDialog } from "@/components/new-todo-dialog";
 
 export default async function DashboardPage() {
   const [openLifeTodos, recentDone, recentIdeas] = await Promise.all([
@@ -29,14 +31,26 @@ export default async function DashboardPage() {
           <CardTitle>Life todos</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          <QuickAddTodo />
+          <div className="flex gap-2">
+            <QuickAddTodo />
+            <NewTodoDialog />
+          </div>
           {openLifeTodos.length === 0 && (
             <p className="text-sm text-muted-foreground">Nothing pending.</p>
           )}
           {openLifeTodos.map((t) => (
             <div key={t.id} className="flex items-center gap-2">
               <TodoCheckbox id={t.id} done={t.status === "done"} />
-              <span>{t.title}</span>
+              <span className="flex-1">{t.title}</span>
+              {t.labels && (
+                <div className="flex gap-1">
+                  {t.labels.split(",").map((label) => (
+                    <Badge key={label} variant="secondary">
+                      {label}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </CardContent>

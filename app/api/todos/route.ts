@@ -23,6 +23,11 @@ export async function GET(req: Request) {
   return Response.json(rows);
 }
 
+function normalizeLabels(labels: unknown): string | null {
+  if (typeof labels !== "string") return null;
+  return labels.split(",").map((l) => l.trim()).filter(Boolean).join(",") || null;
+}
+
 export async function POST(req: Request) {
   const body = await req.json();
   const [row] = await db
@@ -30,6 +35,8 @@ export async function POST(req: Request) {
     .values({
       title: body.title,
       projectId: body.projectId ?? null,
+      description: body.description || null,
+      labels: normalizeLabels(body.labels),
     })
     .returning();
   return Response.json(row, { status: 201 });

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
+import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
+import { Sidebar } from "@/components/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const sans = Plus_Jakarta_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
@@ -23,16 +23,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${sans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <nav className="border-b px-6 py-4 flex gap-6 text-sm font-medium">
-          <Link href="/">Dashboard</Link>
-          <Link href="/projects">Projects</Link>
-          <Link href="/ideas">Ideas</Link>
-          <Link href="/done">Done</Link>
-        </nav>
-        <main className="flex-1 p-6 max-w-3xl w-full mx-auto">{children}</main>
+      <body className="flex min-h-full">
+        <Sidebar />
+        <main className="flex-1 overflow-y-auto p-8">
+          <div className="mx-auto w-full max-w-3xl">{children}</div>
+        </main>
         <Toaster />
       </body>
     </html>

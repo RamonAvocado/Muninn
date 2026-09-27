@@ -3,9 +3,12 @@ import { projects, todos } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { TodoCheckbox } from "@/components/todo-checkbox";
 import { QuickAddTodo } from "@/components/quick-add-todo";
+import { NewTodoDialog } from "@/components/new-todo-dialog";
 import { SyncButton } from "@/components/sync-button";
+import { PushIssueButton } from "@/components/push-issue-button";
 import { DeleteButton } from "@/components/delete-button";
 
 export default async function ProjectPage({
@@ -38,7 +41,10 @@ export default async function ProjectPage({
           <CardTitle>Open</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          <QuickAddTodo projectId={project.id} />
+          <div className="flex gap-2">
+            <QuickAddTodo projectId={project.id} />
+            <NewTodoDialog projectId={project.id} />
+          </div>
           {open.length === 0 && (
             <p className="text-sm text-muted-foreground">Nothing pending.</p>
           )}
@@ -46,6 +52,15 @@ export default async function ProjectPage({
             <div key={t.id} className="flex items-center gap-2">
               <TodoCheckbox id={t.id} done={false} />
               <span className="flex-1">{t.title}</span>
+              {t.labels && (
+                <div className="flex gap-1">
+                  {t.labels.split(",").map((label) => (
+                    <Badge key={label} variant="secondary">
+                      {label}
+                    </Badge>
+                  ))}
+                </div>
+              )}
               {t.githubIssueUrl && (
                 <a
                   href={t.githubIssueUrl}
@@ -54,6 +69,9 @@ export default async function ProjectPage({
                 >
                   #{t.githubIssueNumber}
                 </a>
+              )}
+              {t.source === "manual" && !t.githubIssueNumber && project.githubOwner && project.githubRepo && (
+                <PushIssueButton todoId={t.id} />
               )}
               <DeleteButton url={`/api/todos/${t.id}`} />
             </div>
