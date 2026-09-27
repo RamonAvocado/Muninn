@@ -9,6 +9,8 @@ import { QuickAddTodo } from "@/components/quick-add-todo";
 import { NewTodoDialog } from "@/components/new-todo-dialog";
 import { IdeaItem } from "@/components/idea-item";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardPage() {
   const [openLifeTodos, recentDone, recentIdeas] = await Promise.all([
     db

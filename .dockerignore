@@ -1,0 +1,11 @@
+.git
+node_modules
+.next
+.env*
+sqlite.db
+sqlite.db-journal
+*.db-shm
+*.db-wal
+tsconfig.tsbuildinfo
+.claude
+docker

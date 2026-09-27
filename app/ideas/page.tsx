@@ -6,6 +6,8 @@ import { NewIdeaForm } from "@/components/new-idea-form";
 import { DeleteButton } from "@/components/delete-button";
 import { IdeaItem } from "@/components/idea-item";
 
+export const dynamic = "force-dynamic";
+
 export default async function IdeasPage() {
   const rows = await db.select().from(ideas).orderBy(desc(ideas.createdAt));
 

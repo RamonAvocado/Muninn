@@ -5,6 +5,8 @@ import { NewProjectDialog } from "@/components/new-project-dialog";
 import { PersonalLabelsDialog } from "@/components/personal-labels-dialog";
 import { ProjectCard } from "@/components/project-card";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProjectsPage() {
   const rows = await db.select().from(projects).orderBy(desc(projects.createdAt));
 

@@ -3,6 +3,8 @@ import { todos } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+export const dynamic = "force-dynamic";
+
 export default async function DonePage() {
   const rows = await db.query.todos.findMany({
     where: eq(todos.status, "done"),

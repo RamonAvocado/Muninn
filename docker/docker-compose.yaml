@@ -1,0 +1,14 @@
+services:
+  muninn:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: muninn:latest
+    container_name: muninn
+    ports:
+      - "3001:3000"
+    env_file:
+      - ../.env
+    volumes:
+      - ../sqlite.db:/home/bun/app/sqlite.db
+    restart: unless-stopped
