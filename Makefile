@@ -14,8 +14,8 @@ logs:
 	sudo docker logs muninn -f
 
 tag:
-	git tag v$(VERSION)
-	git push origin v$(VERSION)
+	git tag $(VERSION)
+	git push origin $(VERSION)
 
 release: tag
-	gh release create v$(VERSION) --generate-notes
+	gh release create $(VERSION) --generate-notes
