@@ -16,9 +16,5 @@ rebuild:
 logs:
 	sudo docker logs muninn -f
 
-tag:
-	git tag $(VERSION)
-	git push origin $(VERSION)
-
 release: tag
 	gh release create $(VERSION) --generate-notes

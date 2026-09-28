@@ -11,6 +11,7 @@ import { SyncButton } from "@/components/sync-button";
 import { ProjectSettingsDialog } from "@/components/project-settings-dialog";
 import { PushIssueButton } from "@/components/push-issue-button";
 import { DeleteButton } from "@/components/delete-button";
+import { DoneCollection } from "@/components/done-collection";
 import { PROJECT_ACCENTS } from "@/lib/project-accents";
 
 export default async function ProjectPage({
@@ -111,25 +112,12 @@ export default async function ProjectPage({
         <CardHeader>
           <CardTitle>Done</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-2">
-          {done.length === 0 && (
+        <CardContent>
+          {done.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nothing done yet.</p>
+          ) : (
+            <DoneCollection todos={done} />
           )}
-          {done.map((t) => (
-            <div key={t.id} className="flex items-center gap-2">
-              <TodoCheckbox id={t.id} done={true} />
-              <span className="flex-1 line-through text-muted-foreground">{t.title}</span>
-              {t.githubIssueUrl && (
-                <a
-                  href={t.githubIssueUrl}
-                  target="_blank"
-                  className="text-xs text-muted-foreground underline"
-                >
-                  #{t.githubIssueNumber}
-                </a>
-              )}
-            </div>
-          ))}
         </CardContent>
       </Card>
     </div>

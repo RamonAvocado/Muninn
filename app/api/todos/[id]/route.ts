@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { todos } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { after } from "next/server";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -29,21 +30,25 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     existing.project?.githubOwner &&
     existing.project?.githubRepo
   ) {
-    try {
-      await fetch(
-        `https://api.github.com/repos/${existing.project.githubOwner}/${existing.project.githubRepo}/issues/${existing.githubIssueNumber}`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-            Accept: "application/vnd.github+json",
+    const { githubOwner, githubRepo } = existing.project;
+    const { githubIssueNumber } = existing;
+    after(async () => {
+      try {
+        await fetch(
+          `https://api.github.com/repos/${githubOwner}/${githubRepo}/issues/${githubIssueNumber}`,
+          {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+              Accept: "application/vnd.github+json",
+            },
+            body: JSON.stringify({ state: body.status === "done" ? "closed" : "open" }),
           },
-          body: JSON.stringify({ state: body.status === "done" ? "closed" : "open" }),
-        },
-      );
-    } catch {
-      // best-effort: local status already updated, ignore GitHub sync failures
-    }
+        );
+      } catch {
+        // best-effort: local status already updated, ignore GitHub sync failures
+      }
+    });
   }
 
   return Response.json(row);

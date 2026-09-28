@@ -13,6 +13,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -94,6 +95,8 @@ export function Sidebar() {
           );
         })}
       </nav>
+
+      <ThemeToggle collapsed={collapsed} />
     </aside>
   );
 }
