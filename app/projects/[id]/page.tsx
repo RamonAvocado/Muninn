@@ -8,9 +8,10 @@ import { TodoCheckbox } from "@/components/todo-checkbox";
 import { QuickAddTodo } from "@/components/quick-add-todo";
 import { NewTodoDialog } from "@/components/new-todo-dialog";
 import { SyncButton } from "@/components/sync-button";
-import { ProjectLabelsSection } from "@/components/project-labels-section";
+import { ProjectSettingsDialog } from "@/components/project-settings-dialog";
 import { PushIssueButton } from "@/components/push-issue-button";
 import { DeleteButton } from "@/components/delete-button";
+import { PROJECT_ACCENTS } from "@/lib/project-accents";
 
 export default async function ProjectPage({
   params,
@@ -27,12 +28,20 @@ export default async function ProjectPage({
 
   const open = project.todos.filter((t) => t.status === "todo");
   const done = project.todos.filter((t) => t.status === "done");
+  const accent = PROJECT_ACCENTS.find((a) => a.key === project.accentColor);
+  const hasRepo = !!(project.githubOwner && project.githubRepo);
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">
-          {project.githubOwner && project.githubRepo ? (
+        <h1 className="flex items-center gap-2 text-xl font-semibold">
+          {accent && (
+            <span
+              className="size-2.5 rounded-full shrink-0"
+              style={{ backgroundColor: accent.hex }}
+            />
+          )}
+          {hasRepo ? (
             <a
               href={`https://github.com/${project.githubOwner}/${project.githubRepo}`}
               target="_blank"
@@ -45,9 +54,14 @@ export default async function ProjectPage({
             project.name
           )}
         </h1>
-        {project.githubOwner && project.githubRepo && (
-          <SyncButton projectId={project.id} />
-        )}
+        <div className="flex gap-2">
+          {hasRepo && <SyncButton projectId={project.id} />}
+          <ProjectSettingsDialog
+            projectId={project.id}
+            accentColor={project.accentColor}
+            canSync={hasRepo}
+          />
+        </div>
       </div>
 
       <Card>
@@ -116,18 +130,6 @@ export default async function ProjectPage({
               )}
             </div>
           ))}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Labels</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ProjectLabelsSection
-            projectId={project.id}
-            canSync={!!(project.githubOwner && project.githubRepo)}
-          />
         </CardContent>
       </Card>
     </div>

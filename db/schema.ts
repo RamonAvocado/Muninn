@@ -6,6 +6,7 @@ export const projects = sqliteTable("projects", {
   name: text("name").notNull(),
   githubOwner: text("github_owner"),
   githubRepo: text("github_repo"),
+  accentColor: text("accent_color"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),

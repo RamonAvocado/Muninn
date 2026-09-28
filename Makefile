@@ -1,5 +1,8 @@
 up:
 	sudo docker compose -f docker/docker-compose.yaml up -d
+
+down:
+	sudo docker compose -f docker/docker-compose.yaml down
 	
 exec:
 	sudo docker exec -it muninn bash

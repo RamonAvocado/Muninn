@@ -11,6 +11,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       ...(body.name !== undefined ? { name: body.name } : {}),
       ...(body.githubOwner !== undefined ? { githubOwner: body.githubOwner || null } : {}),
       ...(body.githubRepo !== undefined ? { githubRepo: body.githubRepo || null } : {}),
+      ...(body.accentColor !== undefined ? { accentColor: body.accentColor || null } : {}),
     })
     .where(eq(projects.id, Number(id)))
     .returning();
