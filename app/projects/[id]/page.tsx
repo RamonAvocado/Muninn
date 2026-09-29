@@ -21,7 +21,7 @@ export default async function ProjectPage({
 }) {
   const { id } = await params;
   const project = await db.query.projects.findFirst({
-    where: eq(projects.id, Number(id)),
+    where: eq(projects.id, id),
     with: { todos: { orderBy: asc(todos.createdAt) } },
   });
 
@@ -60,6 +60,7 @@ export default async function ProjectPage({
           <ProjectSettingsDialog
             projectId={project.id}
             accentColor={project.accentColor}
+            groupId={project.groupId}
             canSync={hasRepo}
           />
         </div>

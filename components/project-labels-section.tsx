@@ -8,7 +8,7 @@ export function ProjectLabelsSection({
   projectId,
   canSync,
 }: {
-  projectId: number;
+  projectId: string;
   canSync: boolean;
 }) {
   const [refreshKey, setRefreshKey] = useState(0);

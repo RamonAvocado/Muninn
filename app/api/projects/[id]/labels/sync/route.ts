@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const projectId = Number(id);
+  const projectId = id;
 
   const project = await db.query.projects.findFirst({ where: eq(projects.id, projectId) });
   if (!project?.githubOwner || !project?.githubRepo) {

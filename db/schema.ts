@@ -1,8 +1,19 @@
 import { sqliteTable, integer, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 import { relations, sql } from "drizzle-orm";
 
+export const projectGroups = sqliteTable("project_groups", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  order: integer("order").notNull().default(0),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
 export const projects = sqliteTable("projects", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  groupId: text("group_id").references(() => projectGroups.id, { onDelete: "set null" }),
+  order: integer("order").notNull().default(0),
   name: text("name").notNull(),
   githubOwner: text("github_owner"),
   githubRepo: text("github_repo"),
@@ -16,7 +27,7 @@ export const todos = sqliteTable(
   "todos",
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
-    projectId: integer("project_id").references(() => projects.id, { onDelete: "cascade" }),
+    projectId: text("project_id").references(() => projects.id, { onDelete: "cascade" }),
     title: text("title").notNull(),
     description: text("description"),
     labels: text("labels"),
@@ -58,7 +69,7 @@ export const projectLabels = sqliteTable(
   "project_labels",
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
-    projectId: integer("project_id")
+    projectId: text("project_id")
       .notNull()
       .references(() => projects.id, { onDelete: "cascade" }),
     name: text("name").notNull(),

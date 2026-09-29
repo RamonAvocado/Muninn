@@ -1,26 +1,22 @@
 import { db } from "@/db";
-import { projects } from "@/db/schema";
+import { projectGroups } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const body = await req.json();
   const [row] = await db
-    .update(projects)
+    .update(projectGroups)
     .set({
       ...(body.name !== undefined ? { name: body.name } : {}),
-      ...(body.githubOwner !== undefined ? { githubOwner: body.githubOwner || null } : {}),
-      ...(body.githubRepo !== undefined ? { githubRepo: body.githubRepo || null } : {}),
-      ...(body.accentColor !== undefined ? { accentColor: body.accentColor || null } : {}),
-      ...(body.groupId !== undefined ? { groupId: body.groupId || null } : {}),
     })
-    .where(eq(projects.id, id))
+    .where(eq(projectGroups.id, id))
     .returning();
   return Response.json(row);
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  await db.delete(projects).where(eq(projects.id, id));
+  await db.delete(projectGroups).where(eq(projectGroups.id, id));
   return new Response(null, { status: 204 });
 }

@@ -10,7 +10,7 @@ export function SyncLabelsButton({
   projectId,
   onSynced,
 }: {
-  projectId: number;
+  projectId: string;
   onSynced?: () => void;
 }) {
   const router = useRouter();

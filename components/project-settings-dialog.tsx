@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,16 +18,27 @@ import { SettingsIcon } from "lucide-react";
 export function ProjectSettingsDialog({
   projectId,
   accentColor,
+  groupId,
   canSync,
 }: {
-  projectId: number;
+  projectId: string;
   accentColor: string | null;
+  groupId?: string | null;
   canSync: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [accent, setAccent] = useState(accentColor);
+  const [group, setGroup] = useState(groupId ?? null);
+  const [groups, setGroups] = useState<{ id: string; name: string }[]>([]);
   const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    fetch("/api/project-groups")
+      .then((res) => res.json())
+      .then(setGroups);
+  }, [open]);
 
   async function pickAccent(key: string | null) {
     setAccent(key);
@@ -35,6 +46,16 @@ export function ProjectSettingsDialog({
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ accentColor: key }),
+    });
+    router.refresh();
+  }
+
+  async function pickGroup(id: string) {
+    setGroup(id || null);
+    await fetch(`/api/projects/${projectId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ groupId: id || null }),
     });
     router.refresh();
   }
@@ -81,6 +102,22 @@ export function ProjectSettingsDialog({
                 />
               ))}
             </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <p className="text-sm font-medium">Group</p>
+            <select
+              value={group ?? ""}
+              onChange={(e) => pickGroup(e.target.value)}
+              className="h-9 rounded-md border bg-transparent px-3 text-sm"
+            >
+              <option value="">Ungrouped</option>
+              {groups.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="flex flex-col gap-2">

@@ -9,6 +9,6 @@ export async function DELETE(
   const { id, labelId } = await params;
   await db
     .delete(projectLabels)
-    .where(and(eq(projectLabels.projectId, Number(id)), eq(projectLabels.id, Number(labelId))));
+    .where(and(eq(projectLabels.projectId, id), eq(projectLabels.id, Number(labelId))));
   return new Response(null, { status: 204 });
 }

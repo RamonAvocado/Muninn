@@ -10,7 +10,7 @@ export async function getPersonalLabels() {
   return db.select().from(personalLabels);
 }
 
-export async function getEffectiveLabels(projectId: number) {
+export async function getEffectiveLabels(projectId: string) {
   const rows = await db.select().from(projectLabels).where(eq(projectLabels.projectId, projectId));
   return rows.length > 0 ? rows : getPersonalLabels();
 }

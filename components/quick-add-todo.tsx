@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-export function QuickAddTodo({ projectId }: { projectId?: number }) {
+export function QuickAddTodo({ projectId }: { projectId?: string }) {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [pending, setPending] = useState(false);

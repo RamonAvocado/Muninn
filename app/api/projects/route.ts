@@ -15,6 +15,7 @@ export async function POST(req: Request) {
       name: body.name,
       githubOwner: body.githubOwner || null,
       githubRepo: body.githubRepo || null,
+      groupId: body.groupId || null,
     })
     .returning();
   return Response.json(row, { status: 201 });

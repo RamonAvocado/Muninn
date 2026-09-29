@@ -9,7 +9,7 @@ export async function GET(req: Request) {
 
   const conditions = [];
   if (projectId !== null) {
-    conditions.push(projectId === "null" ? isNull(todos.projectId) : eq(todos.projectId, Number(projectId)));
+    conditions.push(projectId === "null" ? isNull(todos.projectId) : eq(todos.projectId, projectId));
   }
   if (status) {
     conditions.push(eq(todos.status, status as "todo" | "done"));

@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { RefreshCwIcon } from "lucide-react";
 
-export function SyncButton({ projectId }: { projectId: number }) {
+export function SyncButton({ projectId }: { projectId: string }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
 

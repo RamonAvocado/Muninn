@@ -11,7 +11,7 @@ export interface GithubIssue {
   pull_request?: unknown;
 }
 
-export function toTodoRow(issue: GithubIssue, projectId: number): typeof todos.$inferInsert {
+export function toTodoRow(issue: GithubIssue, projectId: string): typeof todos.$inferInsert {
   return {
     projectId,
     title: issue.title,

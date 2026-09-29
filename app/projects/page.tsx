@@ -1,14 +1,31 @@
 import { db } from "@/db";
-import { projects } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { projects, projectGroups } from "@/db/schema";
+import { asc, isNull } from "drizzle-orm";
 import { NewProjectDialog } from "@/components/new-project-dialog";
+import { NewProjectGroupDialog } from "@/components/new-project-group-dialog";
 import { PersonalLabelsDialog } from "@/components/personal-labels-dialog";
-import { ProjectCard } from "@/components/project-card";
+import { ProjectList, type ProjectListItem } from "@/components/project-list";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProjectsPage() {
-  const rows = await db.select().from(projects).orderBy(desc(projects.createdAt));
+  const [groups, ungroupedProjects] = await Promise.all([
+    db.select().from(projectGroups).orderBy(asc(projectGroups.order), asc(projectGroups.createdAt)),
+    db
+      .select()
+      .from(projects)
+      .where(isNull(projects.groupId))
+      .orderBy(asc(projects.order), asc(projects.createdAt)),
+  ]);
+
+  const items: ProjectListItem[] = [
+    ...groups.map((g) => ({ kind: "group" as const, group: g })),
+    ...ungroupedProjects.map((p) => ({ kind: "project" as const, project: p })),
+  ].sort((a, b) => {
+    const orderA = a.kind === "group" ? a.group.order : a.project.order;
+    const orderB = b.kind === "group" ? b.group.order : b.project.order;
+    return orderA - orderB;
+  });
 
   return (
     <div className="flex flex-col gap-6">
@@ -16,17 +33,15 @@ export default async function ProjectsPage() {
         <h1 className="text-xl font-semibold">Projects</h1>
         <div className="flex gap-2">
           <PersonalLabelsDialog />
+          <NewProjectGroupDialog />
           <NewProjectDialog />
         </div>
       </div>
-      <div className="flex flex-col gap-3">
-        {rows.length === 0 && (
-          <p className="text-sm text-muted-foreground">No projects yet.</p>
-        )}
-        {rows.map((p) => (
-          <ProjectCard key={p.id} project={p} />
-        ))}
-      </div>
+      {items.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No projects yet.</p>
+      ) : (
+        <ProjectList items={items} />
+      )}
     </div>
   );
 }
