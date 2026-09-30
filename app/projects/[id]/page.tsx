@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TodoCheckbox } from "@/components/todo-checkbox";
+import { TodoTitle } from "@/components/todo-title";
 import { QuickAddTodo } from "@/components/quick-add-todo";
 import { NewTodoDialog } from "@/components/new-todo-dialog";
 import { SyncButton } from "@/components/sync-button";
@@ -81,7 +82,7 @@ export default async function ProjectPage({
           {open.map((t) => (
             <div key={t.id} className="flex items-center gap-2">
               <TodoCheckbox id={t.id} done={false} />
-              <span className="flex-1">{t.title}</span>
+              <TodoTitle id={t.id} title={t.title} description={t.description} className="flex-1" />
               {t.labels && (
                 <div className="flex gap-1">
                   {t.labels.split(",").map((label) => (

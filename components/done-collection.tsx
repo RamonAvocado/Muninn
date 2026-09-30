@@ -7,10 +7,12 @@ import {
   CollapsiblePanel,
 } from "@/components/ui/collapsible";
 import { TodoCheckbox } from "@/components/todo-checkbox";
+import { TodoTitle } from "@/components/todo-title";
 
 type DoneTodo = {
   id: number;
   title: string;
+  description: string | null;
   githubIssueUrl: string | null;
   githubIssueNumber: number | null;
 };
@@ -26,7 +28,12 @@ export function DoneCollection({ todos }: { todos: DoneTodo[] }) {
         {todos.map((t) => (
           <div key={t.id} className="flex items-center gap-2">
             <TodoCheckbox id={t.id} done={true} />
-            <span className="flex-1 line-through text-muted-foreground">{t.title}</span>
+            <TodoTitle
+              id={t.id}
+              title={t.title}
+              description={t.description}
+              className="flex-1 line-through text-muted-foreground"
+            />
             {t.githubIssueUrl && (
               <a
                 href={t.githubIssueUrl}
