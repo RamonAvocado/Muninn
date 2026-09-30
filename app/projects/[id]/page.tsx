@@ -62,6 +62,9 @@ export default async function ProjectPage({
             projectId={project.id}
             accentColor={project.accentColor}
             groupId={project.groupId}
+            githubOwner={project.githubOwner}
+            githubRepo={project.githubRepo}
+            hasToken={!!project.githubToken}
             canSync={hasRepo}
           />
         </div>

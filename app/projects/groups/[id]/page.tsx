@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { projects, projectGroups } from "@/db/schema";
+import { projects, projectGroups, publicProjectColumns } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -19,7 +19,7 @@ export default async function ProjectGroupPage({
   if (!group) notFound();
 
   const rows = await db
-    .select()
+    .select(publicProjectColumns)
     .from(projects)
     .where(eq(projects.groupId, id))
     .orderBy(asc(projects.order), asc(projects.createdAt));

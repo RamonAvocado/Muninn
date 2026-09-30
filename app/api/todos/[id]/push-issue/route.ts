@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { todos } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { githubHeaders } from "@/lib/github-sync";
 
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -25,10 +26,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     `https://api.github.com/repos/${todo.project.githubOwner}/${todo.project.githubRepo}/issues`,
     {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-        Accept: "application/vnd.github+json",
-      },
+      headers: githubHeaders(todo.project),
       body: JSON.stringify({ title: todo.title, body: todo.description ?? "", labels }),
     },
   );

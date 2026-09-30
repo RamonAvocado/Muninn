@@ -1,8 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -13,17 +21,23 @@ import {
 } from "@/components/ui/dialog";
 import { ProjectLabelsSection } from "@/components/project-labels-section";
 import { PROJECT_ACCENTS } from "@/lib/project-accents";
-import { SettingsIcon } from "lucide-react";
+import { EyeIcon, EyeOffIcon, SettingsIcon } from "lucide-react";
 
 export function ProjectSettingsDialog({
   projectId,
   accentColor,
   groupId,
+  githubOwner,
+  githubRepo,
+  hasToken,
   canSync,
 }: {
   projectId: string;
   accentColor: string | null;
   groupId?: string | null;
+  githubOwner: string | null;
+  githubRepo: string | null;
+  hasToken: boolean;
   canSync: boolean;
 }) {
   const router = useRouter();
@@ -32,13 +46,31 @@ export function ProjectSettingsDialog({
   const [group, setGroup] = useState(groupId ?? null);
   const [groups, setGroups] = useState<{ id: string; name: string }[]>([]);
   const [deleting, setDeleting] = useState(false);
+  const [owner, setOwner] = useState(githubOwner ?? "");
+  const [repo, setRepo] = useState(githubRepo ?? "");
+  const [token, setToken] = useState("");
+  // don't send the token field until the saved one has loaded, or Save would wipe it
+  const [tokenLoaded, setTokenLoaded] = useState(!hasToken);
+  const [showToken, setShowToken] = useState(false);
+  const [githubError, setGithubError] = useState<string | null>(null);
+  // last values sent to the server, so blur/close only saves real changes
+  const savedGithub = useRef({ owner: githubOwner ?? "", repo: githubRepo ?? "", token: "" });
 
   useEffect(() => {
     if (!open) return;
     fetch("/api/project-groups")
       .then((res) => res.json())
       .then(setGroups);
-  }, [open]);
+    if (!hasToken) return;
+    fetch(`/api/projects/${projectId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) return setGithubError(data.error);
+        setToken(data.githubToken);
+        savedGithub.current.token = data.githubToken;
+        setTokenLoaded(true);
+      });
+  }, [open, hasToken, projectId]);
 
   async function pickAccent(key: string | null) {
     setAccent(key);
@@ -60,6 +92,28 @@ export function ProjectSettingsDialog({
     router.refresh();
   }
 
+  async function saveGithub() {
+    const next = { owner, repo, token: tokenLoaded ? token : savedGithub.current.token };
+    const prev = savedGithub.current;
+    if (next.owner === prev.owner && next.repo === prev.repo && next.token === prev.token) return;
+    setGithubError(null);
+    const res = await fetch(`/api/projects/${projectId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        githubOwner: owner,
+        githubRepo: repo,
+        ...(tokenLoaded ? { githubToken: token } : {}),
+      }),
+    });
+    if (!res.ok) {
+      setGithubError((await res.json().catch(() => null))?.error ?? "Could not save");
+      return;
+    }
+    savedGithub.current = next;
+    router.refresh();
+  }
+
   async function deleteProject() {
     if (!confirm("Delete this project? This also deletes its todos and labels.")) return;
     setDeleting(true);
@@ -69,7 +123,13 @@ export function ProjectSettingsDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) saveGithub();
+        setOpen(o);
+      }}
+    >
       <DialogTrigger render={<Button variant="outline" size="icon" />}>
         <SettingsIcon />
       </DialogTrigger>
@@ -106,18 +166,69 @@ export function ProjectSettingsDialog({
 
           <div className="flex flex-col gap-2">
             <p className="text-sm font-medium">Group</p>
-            <select
+            <Select
               value={group ?? ""}
-              onChange={(e) => pickGroup(e.target.value)}
-              className="h-9 rounded-md border bg-transparent px-3 text-sm"
+              onValueChange={(v) => pickGroup(v ?? "")}
+              items={[{ value: "", label: "Ungrouped" }, ...groups.map((g) => ({ value: g.id, label: g.name }))]}
             >
-              <option value="">Ungrouped</option>
-              {groups.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full" aria-label="Group">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Ungrouped</SelectItem>
+                {groups.map((g) => (
+                  <SelectItem key={g.id} value={g.id}>
+                    {g.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div
+            className="flex flex-col gap-2"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") saveGithub();
+            }}
+          >
+            <p className="text-sm font-medium">GitHub</p>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Owner"
+                value={owner}
+                onChange={(e) => setOwner(e.target.value)}
+                onBlur={saveGithub}
+                aria-label="GitHub owner"
+              />
+              <Input
+                placeholder="Repository"
+                value={repo}
+                onChange={(e) => setRepo(e.target.value)}
+                onBlur={saveGithub}
+                aria-label="GitHub repository"
+              />
+            </div>
+            <div className="relative">
+              <Input
+                type={showToken ? "text" : "password"}
+                autoComplete="off"
+                placeholder="Personal access token"
+                value={token}
+                onChange={(e) => setToken(e.target.value)}
+                onBlur={saveGithub}
+                aria-label="GitHub token"
+                className="pr-9"
+              />
+              <button
+                type="button"
+                onClick={() => setShowToken((v) => !v)}
+                className="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-muted-foreground hover:text-foreground"
+                aria-label={showToken ? "Hide token" : "Show token"}
+              >
+                {showToken ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
+              </button>
+            </div>
+            {githubError && <p className="text-sm text-destructive">{githubError}</p>}
           </div>
 
           <div className="flex flex-col gap-2">

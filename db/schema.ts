@@ -1,5 +1,5 @@
 import { sqliteTable, integer, text, uniqueIndex } from "drizzle-orm/sqlite-core";
-import { relations, sql } from "drizzle-orm";
+import { getTableColumns, relations, sql } from "drizzle-orm";
 
 export const projectGroups = sqliteTable("project_groups", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -17,11 +17,17 @@ export const projects = sqliteTable("projects", {
   name: text("name").notNull(),
   githubOwner: text("github_owner"),
   githubRepo: text("github_repo"),
+  githubToken: text("github_token"),
   accentColor: text("accent_color"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
 });
+
+// every project column except the token, for anything that reaches the browser
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const { githubToken: _githubToken, ...publicProjectColumns } = getTableColumns(projects);
+export { publicProjectColumns };
 
 export const todos = sqliteTable(
   "todos",

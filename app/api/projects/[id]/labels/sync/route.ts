@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { projects, projectLabels } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { githubHeaders } from "@/lib/github-sync";
 
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -14,10 +15,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   const res = await fetch(
     `https://api.github.com/repos/${project.githubOwner}/${project.githubRepo}/labels?per_page=100`,
     {
-      headers: {
-        Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-        Accept: "application/vnd.github+json",
-      },
+      headers: githubHeaders(project),
     },
   );
   if (!res.ok) {

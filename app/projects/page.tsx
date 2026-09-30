@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { projects, projectGroups } from "@/db/schema";
+import { projects, projectGroups, publicProjectColumns } from "@/db/schema";
 import { asc, isNull } from "drizzle-orm";
 import { NewProjectDialog } from "@/components/new-project-dialog";
 import { NewProjectGroupDialog } from "@/components/new-project-group-dialog";
@@ -12,7 +12,7 @@ export default async function ProjectsPage() {
   const [groups, ungroupedProjects] = await Promise.all([
     db.select().from(projectGroups).orderBy(asc(projectGroups.order), asc(projectGroups.createdAt)),
     db
-      .select()
+      .select(publicProjectColumns)
       .from(projects)
       .where(isNull(projects.groupId))
       .orderBy(asc(projects.order), asc(projects.createdAt)),

@@ -45,7 +45,8 @@ export function TodoTitle({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
-        render={<span className={cn("cursor-pointer text-left hover:underline", className)} />}
+        type="button"
+        className={cn("cursor-pointer text-left hover:underline", className)}
       >
         {title}
       </DialogTrigger>

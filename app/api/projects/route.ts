@@ -1,9 +1,9 @@
 import { db } from "@/db";
-import { projects } from "@/db/schema";
+import { projects, publicProjectColumns } from "@/db/schema";
 import { desc } from "drizzle-orm";
 
 export async function GET() {
-  const rows = await db.select().from(projects).orderBy(desc(projects.createdAt));
+  const rows = await db.select(publicProjectColumns).from(projects).orderBy(desc(projects.createdAt));
   return Response.json(rows);
 }
 
@@ -17,6 +17,6 @@ export async function POST(req: Request) {
       githubRepo: body.githubRepo || null,
       groupId: body.groupId || null,
     })
-    .returning();
+    .returning(publicProjectColumns);
   return Response.json(row, { status: 201 });
 }
