@@ -1,10 +1,10 @@
 {
   "name": "muninn",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": true,
   "scripts": {
     "predev": "bun run db:migrate",
-    "dev": "next dev",
+    "dev": "next dev -p 3002",
     "prebuild": "bun run db:migrate",
     "build": "next build",
     "start": "next start",

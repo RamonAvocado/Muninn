@@ -6,7 +6,7 @@ services:
     image: muninn:latest
     container_name: muninn
     ports:
-      - "3001:3000"
+      - "3002:3000"
     env_file:
       - ../.env
     volumes:
