@@ -18,6 +18,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Muninn",
   description: "Personal TODO and idea tracker",
+  icons: {
+    icon: [
+      { url: "/brand/mimird-icon-black.svg", media: "(prefers-color-scheme: light)" },
+      { url: "/brand/mimird-icon-white.svg", media: "(prefers-color-scheme: dark)" },
+    ],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
