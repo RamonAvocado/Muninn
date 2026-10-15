@@ -9,6 +9,9 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const start = new Date(searchParams.get("start") ?? 0);
   const end = new Date(searchParams.get("end") ?? 8.64e15);
+  if (isNaN(+start) || isNaN(+end)) {
+    return Response.json({ error: "start and end must be ISO dates" }, { status: 400 });
+  }
 
   const rows = await db
     .select({

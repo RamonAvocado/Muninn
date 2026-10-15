@@ -155,7 +155,7 @@ export function CalendarView({ todos }: { todos: PendingTodo[] }) {
           editable
           droppable
           events={(info, success, failure) =>
-            fetch(`/api/events?start=${info.startStr}&end=${info.endStr}`)
+            fetch(`/api/events?${new URLSearchParams({ start: info.startStr, end: info.endStr })}`)
               .then((r) => r.json())
               .then((rows: EventRow[]) => success(rows.map(toInput)))
               .catch(failure)
