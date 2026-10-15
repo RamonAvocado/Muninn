@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Badge } from "@mimird/ui/components/badge";
+import { Button } from "@mimird/ui/components/button";
+import { Input } from "@mimird/ui/components/input";
 import { PlusIcon, XIcon } from "lucide-react";
 
 type Label = { id: number; name: string; color: string | null };

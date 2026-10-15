@@ -2,16 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Button } from "@mimird/ui/components/button";
+import { Input } from "@mimird/ui/components/input";
+import { Modal } from "@mimird/ui/components/modal";
 import { FolderPlusIcon } from "lucide-react";
 
 export function NewProjectGroupDialog() {
@@ -36,14 +29,12 @@ export function NewProjectGroupDialog() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button variant="outline" size="icon" title="New group" />}>
+    <>
+      <Button variant="outline" size="icon" title="New group" onClick={() => setOpen(true)}>
         <FolderPlusIcon />
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>New group</DialogTitle>
-        </DialogHeader>
+      </Button>
+      <Modal open={open} onOpenChange={setOpen} title="New group">
+        <h2 className="font-heading text-base font-medium">New group</h2>
         <form onSubmit={submit} className="flex flex-col gap-3">
           <Input
             value={name}
@@ -51,13 +42,13 @@ export function NewProjectGroupDialog() {
             placeholder="Group name"
             required
           />
-          <DialogFooter>
+          <div className="flex justify-end gap-2">
             <Button type="submit" disabled={pending}>
               Create
             </Button>
-          </DialogFooter>
+          </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      </Modal>
+    </>
   );
 }

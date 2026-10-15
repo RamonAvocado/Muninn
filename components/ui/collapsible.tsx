@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Collapsible as CollapsiblePrimitive } from "@base-ui/react/collapsible"
-import { cn } from "cn"
+import { cn } from "@mimird/ui/lib/utils"
 
 function Collapsible({ ...props }: CollapsiblePrimitive.Root.Props) {
   return <CollapsiblePrimitive.Root data-slot="collapsible" {...props} />

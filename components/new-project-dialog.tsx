@@ -2,16 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Button } from "@mimird/ui/components/button";
+import { Input } from "@mimird/ui/components/input";
+import { Modal } from "@mimird/ui/components/modal";
 
 export function NewProjectDialog({ groupId }: { groupId?: string } = {}) {
   const router = useRouter();
@@ -39,12 +32,10 @@ export function NewProjectDialog({ groupId }: { groupId?: string } = {}) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button />}>New project</DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>New project</DialogTitle>
-        </DialogHeader>
+    <>
+      <Button onClick={() => setOpen(true)}>New project</Button>
+      <Modal open={open} onOpenChange={setOpen} title="New project">
+        <h2 className="font-heading text-base font-medium">New project</h2>
         <form onSubmit={submit} className="flex flex-col gap-3">
           <Input
             value={name}
@@ -62,13 +53,13 @@ export function NewProjectDialog({ groupId }: { groupId?: string } = {}) {
             onChange={(e) => setGithubRepo(e.target.value)}
             placeholder="GitHub repo (optional)"
           />
-          <DialogFooter>
+          <div className="flex justify-end gap-2">
             <Button type="submit" disabled={pending}>
               Create
             </Button>
-          </DialogFooter>
+          </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      </Modal>
+    </>
   );
 }

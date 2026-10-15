@@ -2,17 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { cn } from "cn";
+import { Button } from "@mimird/ui/components/button";
+import { Textarea } from "@mimird/ui/components/textarea";
+import { Modal } from "@mimird/ui/components/modal";
+import { cn } from "@mimird/ui/lib/utils";
 
 export function TodoTitle({
   id,
@@ -43,29 +36,28 @@ export function TodoTitle({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
+    <>
+      <button
         type="button"
+        onClick={() => setOpen(true)}
         className={cn("cursor-pointer text-left hover:underline", className)}
       >
         {title}
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-        </DialogHeader>
+      </button>
+      <Modal open={open} onOpenChange={setOpen} title={title}>
+        <h2 className="font-heading text-base font-medium">{title}</h2>
         <Textarea
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="Description (optional)"
           rows={6}
         />
-        <DialogFooter>
+        <div className="flex justify-end gap-2">
           <Button onClick={save} disabled={pending}>
             Save
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </Modal>
+    </>
   );
 }

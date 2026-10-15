@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { cn } from "cn";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@mimird/ui/lib/utils";
+import { Card, CardHeader, CardTitle } from "@mimird/ui/components/card";
 import { FolderIcon } from "lucide-react";
 
 export function ProjectGroupCard({

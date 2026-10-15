@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { Sun, Moon, Monitor } from "lucide-react";
-import { cn } from "cn";
+import { cn } from "@mimird/ui/lib/utils";
 
 const OPTIONS = [
   { value: "light", icon: Sun, label: "Light theme" },

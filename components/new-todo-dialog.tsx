@@ -2,19 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Button } from "@mimird/ui/components/button";
+import { Input } from "@mimird/ui/components/input";
+import { Textarea } from "@mimird/ui/components/textarea";
+import { Modal } from "@mimird/ui/components/modal";
 import { ListPlusIcon, XIcon } from "lucide-react";
-import { cn } from "cn";
+import { cn } from "@mimird/ui/lib/utils";
 
 export function NewTodoDialog({ projectId }: { projectId?: string }) {
   const router = useRouter();
@@ -65,14 +58,12 @@ export function NewTodoDialog({ projectId }: { projectId?: string }) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button variant="outline" size="icon" title="New todo" />}>
+    <>
+      <Button variant="outline" size="icon" title="New todo" onClick={() => setOpen(true)}>
         <ListPlusIcon />
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>New todo</DialogTitle>
-        </DialogHeader>
+      </Button>
+      <Modal open={open} onOpenChange={setOpen} title="New todo">
+        <h2 className="font-heading text-base font-medium">New todo</h2>
         <form onSubmit={submit} className="flex flex-col gap-3">
           <Input
             value={title}
@@ -114,13 +105,13 @@ export function NewTodoDialog({ projectId }: { projectId?: string }) {
               })}
             </div>
           )}
-          <DialogFooter>
+          <div className="flex justify-end gap-2">
             <Button type="submit" disabled={pending}>
               Create
             </Button>
-          </DialogFooter>
+          </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      </Modal>
+    </>
   );
 }

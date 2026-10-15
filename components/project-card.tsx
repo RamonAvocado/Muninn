@@ -1,8 +1,8 @@
 "use client"
 
 import { useRouter } from "next/navigation";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardHeader, CardTitle } from "@mimird/ui/components/card";
+import { Badge } from "@mimird/ui/components/badge";
 import { PROJECT_ACCENTS } from "@/lib/project-accents";
 import { FolderMinusIcon } from "lucide-react";
 

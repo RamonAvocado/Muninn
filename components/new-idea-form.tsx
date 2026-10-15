@@ -2,9 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { Input } from "@mimird/ui/components/input";
+import { Textarea } from "@mimird/ui/components/textarea";
+import { Button } from "@mimird/ui/components/button";
 
 export function NewIdeaForm() {
   const router = useRouter();

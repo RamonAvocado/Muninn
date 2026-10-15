@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@mimird/ui/components/button";
 import { XIcon } from "lucide-react";
 
 export function DeleteButton({ url }: { url: string }) {

@@ -1,7 +1,7 @@
 "use client"
 
 import { ChevronRight } from "lucide-react"
-import { cn } from "cn"
+import { cn } from "@mimird/ui/lib/utils"
 import {
   Collapsible,
   CollapsibleTrigger,

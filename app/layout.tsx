@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Sidebar } from "@/components/sidebar";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@mimird/ui/components/sonner";
 import "./globals.css";
 
 const sans = Plus_Jakarta_Sans({
@@ -37,7 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <Sidebar />
           <main className="flex-1 overflow-y-auto p-8">
-            <div className="mx-auto w-full max-w-3xl">{children}</div>
+            <div className="mx-auto w-full max-w-3xl has-[[data-wide]]:max-w-none">{children}</div>
           </main>
           <Toaster />
         </ThemeProvider>

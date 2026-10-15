@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { ideas } from "@/db/schema";
 import { desc } from "drizzle-orm";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@mimird/ui/components/card";
 import { NewIdeaForm } from "@/components/new-idea-form";
 import { DeleteButton } from "@/components/delete-button";
 import { IdeaItem } from "@/components/idea-item";

@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { todos } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@mimird/ui/components/card";
 
 export const dynamic = "force-dynamic";
 

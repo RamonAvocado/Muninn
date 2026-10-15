@@ -2,23 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Button } from "@mimird/ui/components/button";
+import { Input } from "@mimird/ui/components/input";
+import { MenuSelect } from "@mimird/ui/components/menu-select";
+import { Modal } from "@mimird/ui/components/modal";
 import { ProjectLabelsSection } from "@/components/project-labels-section";
 import { PROJECT_ACCENTS } from "@/lib/project-accents";
 import { EyeIcon, EyeOffIcon, SettingsIcon } from "lucide-react";
@@ -123,20 +110,19 @@ export function ProjectSettingsDialog({
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(o) => {
-        if (!o) saveGithub();
-        setOpen(o);
-      }}
-    >
-      <DialogTrigger render={<Button variant="outline" size="icon" />}>
-        <SettingsIcon />
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Project settings</DialogTitle>
-        </DialogHeader>
+    <>
+      <Button variant="outline" size="icon" title="Project settings" aria-label="Project settings" onClick={() => setOpen(true)}>
+        <SettingsIcon aria-hidden />
+      </Button>
+      <Modal
+        open={open}
+        onOpenChange={(o) => {
+          if (!o) saveGithub();
+          setOpen(o);
+        }}
+        title="Project settings"
+      >
+        <h2 className="font-heading text-base font-medium">Project settings</h2>
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
@@ -166,23 +152,13 @@ export function ProjectSettingsDialog({
 
           <div className="flex flex-col gap-2">
             <p className="text-sm font-medium">Group</p>
-            <Select
+            <MenuSelect
               value={group ?? ""}
-              onValueChange={(v) => pickGroup(v ?? "")}
-              items={[{ value: "", label: "Ungrouped" }, ...groups.map((g) => ({ value: g.id, label: g.name }))]}
-            >
-              <SelectTrigger className="w-full" aria-label="Group">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Ungrouped</SelectItem>
-                {groups.map((g) => (
-                  <SelectItem key={g.id} value={g.id}>
-                    {g.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onValueChange={pickGroup}
+              options={[{ value: "", label: "Ungrouped" }, ...groups.map((g) => ({ value: g.id, label: g.name }))]}
+              className="w-full"
+              aria-label="Group"
+            />
           </div>
 
           <div
@@ -237,12 +213,12 @@ export function ProjectSettingsDialog({
           </div>
         </div>
 
-        <DialogFooter>
+        <div className="flex justify-end gap-2">
           <Button variant="destructive" disabled={deleting} onClick={deleteProject}>
             Delete project
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </Modal>
+    </>
   );
 }

@@ -62,6 +62,22 @@ export const ideas = sqliteTable("ideas", {
     .default(sql`(unixepoch())`),
 });
 
+export const events = sqliteTable("events", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  notes: text("notes"),
+  kind: text("kind", { enum: ["block", "plan", "note"] }).notNull().default("block"),
+  start: integer("start", { mode: "timestamp" }).notNull(),
+  end: integer("end", { mode: "timestamp" }).notNull(),
+  allDay: integer("all_day", { mode: "boolean" }).notNull().default(false),
+  // weekdays the event repeats on, "0,1,...,6" with 0 = Sunday; null = one-off
+  repeatDays: text("repeat_days"),
+  todoId: integer("todo_id").references(() => todos.id, { onDelete: "cascade" }),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
 export const personalLabels = sqliteTable("personal_labels", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull().unique(),

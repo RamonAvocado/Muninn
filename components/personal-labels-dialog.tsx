@@ -1,33 +1,27 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { useState } from "react";
+import { Button } from "@mimird/ui/components/button";
+import { Modal } from "@mimird/ui/components/modal";
 import { LabelManager } from "@/components/label-manager";
 import { TagIcon } from "lucide-react";
 
 export function PersonalLabelsDialog() {
+  const [open, setOpen] = useState(false);
   return (
-    <Dialog>
-      <DialogTrigger render={<Button variant="outline" />}>
+    <>
+      <Button variant="outline" onClick={() => setOpen(true)}>
         <TagIcon />
         My labels
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>My labels</DialogTitle>
-        </DialogHeader>
+      </Button>
+      <Modal open={open} onOpenChange={setOpen} title="My labels">
+        <h2 className="font-heading text-base font-medium">My labels</h2>
         <LabelManager
           listUrl="/api/labels/personal"
           addUrl="/api/labels/personal"
           deleteUrlFor={(id) => `/api/labels/personal/${id}`}
         />
-      </DialogContent>
-    </Dialog>
+      </Modal>
+    </>
   );
 }

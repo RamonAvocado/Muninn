@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { Button } from "@mimird/ui/components/button";
 import { RefreshCwIcon } from "lucide-react";
 
 export function SyncLabelsButton({
