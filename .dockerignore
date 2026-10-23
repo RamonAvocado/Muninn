@@ -9,3 +9,4 @@ sqlite.db-journal
 tsconfig.tsbuildinfo
 .claude
 docker
+.next-docker

@@ -1,0 +1,23 @@
+services:
+  muninn-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: muninn-dev
+    container_name: muninn-dev
+    working_dir: /app
+    # Same uid as the host user so files it writes (sqlite.db, AGENTS.md) stay yours
+    user: "1000:1000"
+    environment:
+      HOME: /tmp
+      # Separate build dir: next dev locks its dist dir, so it can't share .next with a host `bun run dev`
+      NEXT_DIST_DIR: .next-docker
+    command: sh -c "bun install && bun run dev"
+    ports:
+      - "23002:3002"
+    env_file:
+      - ../.env
+    # Whole repo mounted: code changes hot-reload, sqlite.db is the same file host `bun run dev` uses
+    volumes:
+      - ..:/app
+    restart: unless-stopped

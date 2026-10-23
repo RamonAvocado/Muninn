@@ -18,3 +18,12 @@ logs:
 
 release: tag
 	gh release create $(VERSION) --generate-notes
+
+dev-up:
+	sudo docker compose -f docker/docker-compose.dev.yaml up -d
+
+dev-down:
+	sudo docker compose -f docker/docker-compose.dev.yaml down
+
+dev-logs:
+	sudo docker logs muninn-dev -f

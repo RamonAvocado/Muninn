@@ -1,0 +1,3 @@
+FROM oven/bun:1
+# next's CLI is `#!/usr/bin/env node`; without node, bun runs it and can't resolve Turbopack's hashed externals
+COPY --from=node:24-slim /usr/local/bin/node /usr/local/bin/node
