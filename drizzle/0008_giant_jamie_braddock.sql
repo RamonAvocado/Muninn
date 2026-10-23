@@ -1,0 +1,1 @@
+ALTER TABLE `events` ADD `skip_dates` text;

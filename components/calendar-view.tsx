@@ -7,7 +7,9 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin, { Draggable } from "@fullcalendar/interaction";
 import type { EventApi, EventInput } from "@fullcalendar/core";
 import { ChevronDown } from "lucide-react";
+import { toast } from "sonner";
 import { PROJECT_ACCENTS } from "@/lib/project-accents";
+import { occurrences } from "@/lib/repeat-days";
 import { EventDialog, type EventDraft } from "@/components/event-dialog";
 
 type PendingTodo = {
@@ -26,6 +28,7 @@ type EventRow = {
   end: string;
   allDay: boolean;
   repeatDays: string | null;
+  skipDates: string | null;
   todoId: number | null;
   todoStatus: "todo" | "done" | null;
   projectName: string | null;
@@ -34,29 +37,48 @@ type EventRow = {
 
 const accentHex = (key: string | null) => PROJECT_ACCENTS.find((a) => a.key === key)?.hex;
 
-function toInput(row: EventRow): EventInput {
+function toInputs(row: EventRow, from: Date, to: Date): EventInput[] {
   const color = accentHex(row.accentColor);
-  return {
-    id: String(row.id),
+  const base = {
     title: row.projectName ? `${row.title} · ${row.projectName}` : row.title,
-    ...(row.repeatDays ? repeating(row) : { start: row.start, end: row.end }),
     allDay: row.allDay,
     backgroundColor: color,
     borderColor: color,
     classNames: [`muninn-${row.kind}`, row.todoStatus === "done" ? "muninn-done" : ""],
-    extendedProps: { row },
   };
+  if (!row.repeatDays) {
+    return [{ ...base, id: String(row.id), start: row.start, end: row.end, extendedProps: { row } }];
+  }
+  // groupId makes FullCalendar drag the whole series together
+  return occurrences({ ...row, repeatDays: row.repeatDays }, from, to).map((o) => ({
+    ...base,
+    id: `${row.id}-${o.day}`,
+    groupId: String(row.id),
+    start: o.start,
+    end: o.end,
+    extendedProps: { row, day: o.day },
+  }));
 }
 
-// the stored start/end is the first occurrence: it anchors the series and sets time and length
-function repeating(row: EventRow): EventInput {
-  const start = new Date(row.start);
-  const hhmm = (d: Date) => `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-  return {
-    daysOfWeek: row.repeatDays!.split(",").map(Number),
-    startRecur: new Date(start.getFullYear(), start.getMonth(), start.getDate()),
-    ...(row.allDay ? {} : { startTime: hhmm(start), duration: { milliseconds: +new Date(row.end) - +start } }),
-  };
+function patch(id: number, body: object) {
+  return fetch(`/api/events/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+// a toast whose Undo button runs `undo`, then reloads the calendar
+function offerUndo(message: string, undo: () => Promise<Response>, refetch: () => void) {
+  toast(message, {
+    action: {
+      label: "Undo",
+      onClick: async () => {
+        if (!(await undo()).ok) toast.error("Couldn't undo");
+        refetch();
+      },
+    },
+  });
 }
 
 async function patchTimes(event: EventApi, revert: () => void, refetch: () => void) {
@@ -70,13 +92,10 @@ async function patchTimes(event: EventApi, revert: () => void, refetch: () => vo
     anchor.setHours(start.getHours(), start.getMinutes(), 0, 0);
     start = anchor;
   }
-  const res = await fetch(`/api/events/${event.id}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ start, end: new Date(+start + length), allDay: event.allDay }),
-  });
-  if (!res.ok) revert();
-  else if (row.repeatDays) refetch();
+  const res = await patch(row.id, { start, end: new Date(+start + length), allDay: event.allDay });
+  if (!res.ok) return revert();
+  if (row.repeatDays) refetch();
+  offerUndo("Moved", () => patch(row.id, { start: row.start, end: row.end, allDay: row.allDay }), refetch);
 }
 
 export function CalendarView({ todos }: { todos: PendingTodo[] }) {
@@ -157,7 +176,7 @@ export function CalendarView({ todos }: { todos: PendingTodo[] }) {
           events={(info, success, failure) =>
             fetch(`/api/events?${new URLSearchParams({ start: info.startStr, end: info.endStr })}`)
               .then((r) => r.json())
-              .then((rows: EventRow[]) => success(rows.map(toInput)))
+              .then((rows: EventRow[]) => success(rows.flatMap((row) => toInputs(row, info.start, info.end))))
               .catch(failure)
           }
           select={(info) => {
@@ -170,6 +189,7 @@ export function CalendarView({ todos }: { todos: PendingTodo[] }) {
               end: info.end,
               allDay: info.allDay,
               repeatDays: [],
+              skipDates: [],
             });
           }}
           eventClick={({ event }) => {
@@ -183,6 +203,9 @@ export function CalendarView({ todos }: { todos: PendingTodo[] }) {
               end: new Date(row.end),
               allDay: row.allDay,
               repeatDays: row.repeatDays?.split(",").map(Number) ?? [],
+              skipDates: row.skipDates?.split(",") ?? [],
+              todoId: row.todoId,
+              day: event.extendedProps.day,
             });
           }}
           eventDrop={({ event, revert }) => patchTimes(event, revert, refetch)}
@@ -209,12 +232,13 @@ export function CalendarView({ todos }: { todos: PendingTodo[] }) {
 
       {draft && (
         <EventDialog
-          key={draft.id ?? +draft.start}
+          key={`${draft.id ?? +draft.start}-${draft.day}`}
           draft={draft}
           onClose={() => setDraft(null)}
-          onSaved={() => {
+          onSaved={(undo) => {
             setDraft(null);
             refetch();
+            if (undo) offerUndo(undo.message, undo.run, refetch);
           }}
         />
       )}

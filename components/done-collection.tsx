@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import {
   Collapsible,
@@ -18,8 +19,9 @@ type DoneTodo = {
 };
 
 export function DoneCollection({ todos }: { todos: DoneTodo[] }) {
+  const [defaultOpen] = useState(todos.length <= 5);
   return (
-    <Collapsible defaultOpen={todos.length <= 5} className="flex flex-col gap-2">
+    <Collapsible defaultOpen={defaultOpen} className="flex flex-col gap-2">
       <CollapsibleTrigger className="flex items-center gap-1 text-left text-sm font-medium text-muted-foreground">
         <ChevronRight className="size-3.5 shrink-0 transition-transform data-panel-open:rotate-90" />
         {todos.length} done

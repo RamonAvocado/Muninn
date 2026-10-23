@@ -72,6 +72,8 @@ export const events = sqliteTable("events", {
   allDay: integer("all_day", { mode: "boolean" }).notNull().default(false),
   // weekdays the event repeats on, "0,1,...,6" with 0 = Sunday; null = one-off
   repeatDays: text("repeat_days"),
+  // local days ("YYYY-MM-DD") removed from the series, comma-separated
+  skipDates: text("skip_dates"),
   todoId: integer("todo_id").references(() => todos.id, { onDelete: "cascade" }),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()

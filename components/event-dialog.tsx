@@ -17,6 +17,10 @@ export type EventDraft = {
   end: Date;
   allDay: boolean;
   repeatDays: number[];
+  skipDates: string[];
+  todoId?: number | null;
+  /** the clicked occurrence of a repeating entry, "YYYY-MM-DD" */
+  day?: string;
 };
 
 const KINDS = [
@@ -46,22 +50,32 @@ export function EventDialog({
 }: {
   draft: EventDraft;
   onClose: () => void;
-  onSaved: () => void;
+  /** with an undo, the calendar offers it in a toast */
+  onSaved: (undo?: { message: string; run: () => Promise<Response> }) => void;
 }) {
   const [form, setForm] = useState(draft);
   const [pending, setPending] = useState(false);
   const everyDay = form.repeatDays.length === 7;
 
-  async function send(method: "POST" | "PATCH" | "DELETE") {
+  const isSeries = !!draft.id && draft.repeatDays.length > 0;
+
+  const request = (method: "POST" | "PATCH" | "DELETE", url: string, body?: object) =>
+    fetch(url, { method, headers: { "Content-Type": "application/json" }, body: body && JSON.stringify(body) });
+
+  async function send(method: "POST" | "PATCH" | "DELETE", body?: object, undo?: Parameters<typeof onSaved>[0]) {
     setPending(true);
-    const res = await fetch(draft.id ? `/api/events/${draft.id}` : "/api/events", {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: method === "DELETE" ? undefined : JSON.stringify({ ...form, repeatDays: form.repeatDays.join(",") }),
-    });
+    const res = await request(method, draft.id ? `/api/events/${draft.id}` : "/api/events", body);
     setPending(false);
-    if (res.ok) onSaved();
+    if (res.ok) onSaved(undo);
   }
+
+  // undoing a delete recreates the entry as it was when the dialog opened (it gets a new id)
+  const restore = () =>
+    request("POST", "/api/events", {
+      ...draft,
+      repeatDays: draft.repeatDays.join(","),
+      skipDates: draft.skipDates.join(","),
+    });
 
   return (
     <Modal open onOpenChange={(open) => !open && onClose()} title={draft.id ? "Edit entry" : "New entry"}>
@@ -69,7 +83,12 @@ export function EventDialog({
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (form.title.trim()) send(draft.id ? "PATCH" : "POST");
+            if (form.title.trim())
+              send(draft.id ? "PATCH" : "POST", {
+                ...form,
+                repeatDays: form.repeatDays.join(","),
+                skipDates: form.skipDates.join(","),
+              });
           }}
           className="flex flex-col gap-3"
         >
@@ -134,9 +153,36 @@ export function EventDialog({
             placeholder="Notes (optional)"
           />
           <div className="flex justify-end gap-2">
+            {isSeries && draft.day && (
+              // removes only the clicked day; the rest of the series stays
+              <Button
+                type="button"
+                variant="outline"
+                disabled={pending}
+                onClick={() =>
+                  send(
+                    "PATCH",
+                    { skipDates: [...draft.skipDates, draft.day].join(",") },
+                    {
+                      message: "Day removed",
+                      run: () => request("PATCH", `/api/events/${draft.id}`, { skipDates: draft.skipDates.join(",") }),
+                    },
+                  )
+                }
+              >
+                Delete this day
+              </Button>
+            )}
             {draft.id && (
-              <Button type="button" variant="destructive" disabled={pending} onClick={() => send("DELETE")}>
-                Delete
+              <Button
+                type="button"
+                variant="destructive"
+                disabled={pending}
+                onClick={() =>
+                  send("DELETE", undefined, { message: isSeries ? "Series deleted" : "Entry deleted", run: restore })
+                }
+              >
+                {isSeries ? "Delete all" : "Delete"}
               </Button>
             )}
             <Button type="submit" disabled={pending}>

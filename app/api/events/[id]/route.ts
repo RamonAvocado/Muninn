@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { events } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { normalizeRepeatDays } from "@/lib/repeat-days";
+import { normalizeRepeatDays, normalizeSkipDates } from "@/lib/repeat-days";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -16,6 +16,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       ...(body.end !== undefined ? { end: new Date(body.end) } : {}),
       ...(body.allDay !== undefined ? { allDay: !!body.allDay } : {}),
       ...(body.repeatDays !== undefined ? { repeatDays: normalizeRepeatDays(body.repeatDays) } : {}),
+      ...(body.skipDates !== undefined ? { skipDates: normalizeSkipDates(body.skipDates) } : {}),
     })
     .where(eq(events.id, Number(id)))
     .returning();

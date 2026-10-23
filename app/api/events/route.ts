@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { events, projects, todos } from "@/db/schema";
 import { and, eq, gt, isNotNull, lt, or } from "drizzle-orm";
-import { normalizeRepeatDays } from "@/lib/repeat-days";
+import { normalizeRepeatDays, normalizeSkipDates } from "@/lib/repeat-days";
 
 const KINDS = ["block", "plan", "note"] as const;
 
@@ -23,6 +23,7 @@ export async function GET(req: Request) {
       end: events.end,
       allDay: events.allDay,
       repeatDays: events.repeatDays,
+      skipDates: events.skipDates,
       todoId: events.todoId,
       todoStatus: todos.status,
       projectName: projects.name,
@@ -52,6 +53,7 @@ export async function POST(req: Request) {
       end,
       allDay: !!body.allDay,
       repeatDays: normalizeRepeatDays(body.repeatDays),
+      skipDates: normalizeSkipDates(body.skipDates),
       todoId: body.todoId ?? null,
     })
     .returning();
