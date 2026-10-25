@@ -184,4 +184,9 @@
 .fc .muninn-block:not([style*="background"]) .fc-event-main { color: var(--foreground); }
 .fc .muninn-note { background: transparent; border-style: dashed; border-color: var(--muted-foreground); }
 .fc .muninn-note .fc-event-main, .fc .muninn-note .fc-event-title { color: var(--foreground); }
+.fc .muninn-deep { border-width: 0 0 0 4px; border-color: var(--brand); }
+.fc .muninn-deep:not([style*="background"]) { background: var(--muted); }
+.fc .muninn-deep:not([style*="background"]) .fc-event-main { color: var(--foreground); }
+.fc .muninn-sleep { background: transparent; border-color: var(--border); opacity: 0.6; }
+.fc .muninn-sleep .fc-event-main { color: var(--muted-foreground); }
 .fc .muninn-done .fc-event-title { text-decoration: line-through; opacity: 0.7; }

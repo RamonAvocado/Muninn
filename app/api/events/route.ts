@@ -2,8 +2,9 @@ import { db } from "@/db";
 import { events, projects, todos } from "@/db/schema";
 import { and, eq, gt, isNotNull, lt, or } from "drizzle-orm";
 import { normalizeRepeatDays, normalizeSkipDates } from "@/lib/repeat-days";
+import { deepWorkFields } from "@/lib/deep-work";
 
-const KINDS = ["block", "plan", "note"] as const;
+const KINDS = ["block", "plan", "note", "deep", "sleep"] as const;
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -25,6 +26,16 @@ export async function GET(req: Request) {
       repeatDays: events.repeatDays,
       skipDates: events.skipDates,
       todoId: events.todoId,
+      todoIds: events.todoIds,
+      goal: events.goal,
+      startedAt: events.startedAt,
+      stoppedAt: events.stoppedAt,
+      goalAchieved: events.goalAchieved,
+      focus: events.focus,
+      energy: events.energy,
+      interruptions: events.interruptions,
+      music: events.music,
+      location: events.location,
       todoStatus: todos.status,
       projectName: projects.name,
       accentColor: projects.accentColor,
@@ -43,18 +54,21 @@ export async function POST(req: Request) {
   if (!body.title?.trim() || isNaN(+start) || isNaN(+end) || end <= start) {
     return Response.json({ error: "title, start and end (after start) are required" }, { status: 400 });
   }
+  const kind = KINDS.includes(body.kind) ? body.kind : "block";
   const [row] = await db
     .insert(events)
     .values({
       title: body.title,
       notes: body.notes || null,
-      kind: KINDS.includes(body.kind) ? body.kind : "block",
+      kind,
       start,
       end,
       allDay: !!body.allDay,
-      repeatDays: normalizeRepeatDays(body.repeatDays),
+      // deep work is one-off: one row is one session
+      repeatDays: kind === "deep" ? null : normalizeRepeatDays(body.repeatDays),
       skipDates: normalizeSkipDates(body.skipDates),
       todoId: body.todoId ?? null,
+      ...deepWorkFields(body),
     })
     .returning();
   return Response.json(row, { status: 201 });

@@ -45,3 +45,26 @@ export function occurrences(
   }
   return out;
 }
+
+// "3, 7,3,x" -> "3,7": unique positive integer ids, in the given order; null when empty
+export function normalizeIds(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  return [...new Set(value.split(",").map((d) => d.trim()))].filter((d) => /^[1-9]\d*$/.test(d)).join(",") || null;
+}
+
+// hours of sleep that ended on local day "YYYY-MM-DD", from sleep blocks (one-off or repeating)
+export function sleepHoursFor(
+  day: string,
+  blocks: { start: string | Date; end: string | Date; repeatDays: string | null; skipDates: string | null }[],
+): number {
+  const [y, m, d] = day.split("-").map(Number);
+  const from = new Date(y, m - 1, d);
+  const to = new Date(y, m - 1, d + 1);
+  const spans = blocks.flatMap((b) =>
+    b.repeatDays
+      ? occurrences({ ...b, repeatDays: b.repeatDays }, from, to)
+      : [{ start: new Date(b.start), end: new Date(b.end) }],
+  );
+  const ms = spans.filter((s) => dayKey(s.end) === day).reduce((sum, s) => sum + +s.end - +s.start, 0);
+  return ms / 36e5;
+}

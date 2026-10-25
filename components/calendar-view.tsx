@@ -10,14 +10,8 @@ import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { PROJECT_ACCENTS } from "@/lib/project-accents";
 import { occurrences } from "@/lib/repeat-days";
-import { EventDialog, type EventDraft } from "@/components/event-dialog";
-
-type PendingTodo = {
-  id: number;
-  title: string;
-  projectName: string | null;
-  accentColor: string | null;
-};
+import { EMPTY_SESSION, EventDialog, type EventDraft } from "@/components/event-dialog";
+import type { CalendarTodo } from "@/components/deep-work-panel";
 
 type EventRow = {
   id: number;
@@ -30,6 +24,16 @@ type EventRow = {
   repeatDays: string | null;
   skipDates: string | null;
   todoId: number | null;
+  todoIds: string | null;
+  goal: string | null;
+  startedAt: string | null;
+  stoppedAt: string | null;
+  goalAchieved: EventDraft["goalAchieved"];
+  focus: number | null;
+  energy: number | null;
+  interruptions: number;
+  music: EventDraft["music"];
+  location: string | null;
   todoStatus: "todo" | "done" | null;
   projectName: string | null;
   accentColor: string | null;
@@ -98,7 +102,7 @@ async function patchTimes(event: EventApi, revert: () => void, refetch: () => vo
   offerUndo("Moved", () => patch(row.id, { start: row.start, end: row.end, allDay: row.allDay }), refetch);
 }
 
-export function CalendarView({ todos }: { todos: PendingTodo[] }) {
+export function CalendarView({ todos }: { todos: CalendarTodo[] }) {
   const calendarRef = useRef<FullCalendar>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const [draft, setDraft] = useState<EventDraft | null>(null);
@@ -117,14 +121,15 @@ export function CalendarView({ todos }: { todos: PendingTodo[] }) {
 
   const refetch = () => calendarRef.current?.getApi().refetchEvents();
 
+  const pending = todos.filter((t) => t.status === "todo");
   const groups = Object.entries(
-    Object.groupBy(todos, (t) => t.projectName ?? "Personal"),
+    Object.groupBy(pending, (t) => t.projectName ?? "Personal"),
   );
 
   return (
     <div className="flex gap-6">
       <div ref={panelRef} className="flex w-56 shrink-0 flex-col gap-4">
-        {todos.length === 0 && <p className="text-sm text-muted-foreground">Nothing pending.</p>}
+        {pending.length === 0 && <p className="text-sm text-muted-foreground">Nothing pending.</p>}
         {groups.map(([project, items]) => (
           // ponytail: native <details>, open state is not remembered across reloads
           <details key={project} open className="group/project">
@@ -190,6 +195,7 @@ export function CalendarView({ todos }: { todos: PendingTodo[] }) {
               allDay: info.allDay,
               repeatDays: [],
               skipDates: [],
+              ...EMPTY_SESSION,
             });
           }}
           eventClick={({ event }) => {
@@ -206,6 +212,16 @@ export function CalendarView({ todos }: { todos: PendingTodo[] }) {
               skipDates: row.skipDates?.split(",") ?? [],
               todoId: row.todoId,
               day: event.extendedProps.day,
+              todoIds: row.todoIds?.split(",").map(Number) ?? [],
+              goal: row.goal ?? "",
+              startedAt: row.startedAt ? new Date(row.startedAt) : null,
+              stoppedAt: row.stoppedAt ? new Date(row.stoppedAt) : null,
+              goalAchieved: row.goalAchieved,
+              focus: row.focus,
+              energy: row.energy,
+              interruptions: row.interruptions,
+              music: row.music,
+              location: row.location ?? "",
             });
           }}
           eventDrop={({ event, revert }) => patchTimes(event, revert, refetch)}
@@ -234,7 +250,11 @@ export function CalendarView({ todos }: { todos: PendingTodo[] }) {
         <EventDialog
           key={`${draft.id ?? +draft.start}-${draft.day}`}
           draft={draft}
-          onClose={() => setDraft(null)}
+          todos={todos}
+          onClose={() => {
+            setDraft(null);
+            refetch(); // the timer and +1 save without Save
+          }}
           onSaved={(undo) => {
             setDraft(null);
             refetch();

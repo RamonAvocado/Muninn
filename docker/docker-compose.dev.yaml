@@ -6,7 +6,6 @@ services:
     image: muninn-dev
     container_name: muninn-dev
     working_dir: /app
-    # Same uid as the host user so files it writes (sqlite.db, AGENTS.md) stay yours
     user: "1000:1000"
     environment:
       HOME: /tmp
@@ -17,7 +16,6 @@ services:
       - "23002:3002"
     env_file:
       - ../.env
-    # Whole repo mounted: code changes hot-reload, sqlite.db is the same file host `bun run dev` uses
     volumes:
       - ..:/app
     restart: unless-stopped

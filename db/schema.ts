@@ -1,4 +1,4 @@
-import { sqliteTable, integer, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { sqliteTable, integer, real, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 import { getTableColumns, relations, sql } from "drizzle-orm";
 
 export const projectGroups = sqliteTable("project_groups", {
@@ -66,7 +66,7 @@ export const events = sqliteTable("events", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
   notes: text("notes"),
-  kind: text("kind", { enum: ["block", "plan", "note"] }).notNull().default("block"),
+  kind: text("kind", { enum: ["block", "plan", "note", "deep", "sleep"] }).notNull().default("block"),
   start: integer("start", { mode: "timestamp" }).notNull(),
   end: integer("end", { mode: "timestamp" }).notNull(),
   allDay: integer("all_day", { mode: "boolean" }).notNull().default(false),
@@ -75,9 +75,31 @@ export const events = sqliteTable("events", {
   // local days ("YYYY-MM-DD") removed from the series, comma-separated
   skipDates: text("skip_dates"),
   todoId: integer("todo_id").references(() => todos.id, { onDelete: "cascade" }),
+  // deep work session; a deep block is one-off, so one row is one session
+  // todos worked on, "3,7,12"
+  todoIds: text("todo_ids"),
+  goal: text("goal"),
+  startedAt: integer("started_at", { mode: "timestamp" }),
+  stoppedAt: integer("stopped_at", { mode: "timestamp" }),
+  goalAchieved: text("goal_achieved", { enum: ["yes", "partial", "no"] }),
+  focus: integer("focus"),
+  energy: integer("energy"),
+  interruptions: integer("interruptions").notNull().default(0),
+  music: text("music", { enum: ["none", "instrumental", "lyrics", "ambient"] }),
+  location: text("location"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
+});
+
+// logged once per local day ("YYYY-MM-DD")
+export const dayLogs = sqliteTable("day_logs", {
+  day: text("day").primaryKey(),
+  // manual override; null = computed from sleep blocks
+  sleepHours: real("sleep_hours"),
+  exercise: integer("exercise", { mode: "boolean" }),
+  caffeine: text("caffeine"),
+  meetings: text("meetings"),
 });
 
 export const personalLabels = sqliteTable("personal_labels", {

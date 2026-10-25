@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { dayKey, normalizeRepeatDays, normalizeSkipDates, occurrences } from "./repeat-days";
+import { dayKey, normalizeIds, normalizeRepeatDays, normalizeSkipDates, occurrences, sleepHoursFor } from "./repeat-days";
 
 test("normalizeRepeatDays", () => {
   expect(normalizeRepeatDays("1, 3,1,9,x")).toBe("1,3");
@@ -36,4 +36,23 @@ test("occurrences: every day, overnight, with a skipped day", () => {
 test("occurrences: weekdays only", () => {
   const series = { start: new Date(2026, 9, 12, 9), end: new Date(2026, 9, 12, 17), repeatDays: "1,2,3,4,5", skipDates: null };
   expect(occurrences(series, new Date(2026, 9, 12), new Date(2026, 9, 19)).length).toBe(5);
+});
+
+test("normalizeIds", () => {
+  expect(normalizeIds("3, 7,3,x,0")).toBe("3,7");
+  expect(normalizeIds("")).toBeNull();
+});
+
+test("sleepHoursFor: counts sleep ending that day", () => {
+  const nightly = {
+    start: new Date(2026, 9, 15, 23),
+    end: new Date(2026, 9, 16, 7),
+    repeatDays: "0,1,2,3,4,5,6",
+    skipDates: "2026-10-17",
+  };
+  const nap = { start: new Date(2026, 9, 16, 14), end: new Date(2026, 9, 16, 15), repeatDays: null, skipDates: null };
+  expect(sleepHoursFor("2026-10-16", [nightly, nap])).toBe(9);
+  expect(sleepHoursFor("2026-10-17", [nightly])).toBe(8);
+  expect(sleepHoursFor("2026-10-18", [nightly])).toBe(0); // the night of the 17th was skipped
+  expect(sleepHoursFor("2026-10-15", [nightly])).toBe(0); // before the series starts
 });

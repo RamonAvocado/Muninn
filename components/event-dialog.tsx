@@ -7,12 +7,13 @@ import { Textarea } from "@mimird/ui/components/textarea";
 import { Modal } from "@mimird/ui/components/modal";
 import { MenuSelect } from "@mimird/ui/components/menu-select";
 import { Switch } from "@mimird/ui/components/switch";
+import { DeepWorkPanel, type CalendarTodo } from "@/components/deep-work-panel";
 
 export type EventDraft = {
   id?: number;
   title: string;
   notes: string;
-  kind: "block" | "plan" | "note";
+  kind: "block" | "plan" | "note" | "deep" | "sleep";
   start: Date;
   end: Date;
   allDay: boolean;
@@ -21,13 +22,47 @@ export type EventDraft = {
   todoId?: number | null;
   /** the clicked occurrence of a repeating entry, "YYYY-MM-DD" */
   day?: string;
+  // deep work session
+  todoIds: number[];
+  goal: string;
+  startedAt: Date | null;
+  stoppedAt: Date | null;
+  goalAchieved: "yes" | "partial" | "no" | null;
+  focus: number | null;
+  energy: number | null;
+  interruptions: number;
+  music: "none" | "instrumental" | "lyrics" | "ambient" | null;
+  location: string;
 };
+
+export const EMPTY_SESSION = {
+  todoIds: [],
+  goal: "",
+  startedAt: null,
+  stoppedAt: null,
+  goalAchieved: null,
+  focus: null,
+  energy: null,
+  interruptions: 0,
+  music: null,
+  location: "",
+} satisfies Partial<EventDraft>;
 
 const KINDS = [
   { value: "block", label: "Time block" },
   { value: "plan", label: "Plan" },
   { value: "note", label: "Note" },
+  { value: "deep", label: "Deep work" },
+  { value: "sleep", label: "Sleep" },
 ];
+
+// the draft as the events API takes it
+const toBody = (d: EventDraft) => ({
+  ...d,
+  repeatDays: d.repeatDays.join(","),
+  skipDates: d.skipDates.join(","),
+  todoIds: d.todoIds.join(","),
+});
 
 // Monday-first, matching the calendar; value is JS getDay()
 const WEEKDAYS = [
@@ -47,8 +82,10 @@ export function EventDialog({
   draft,
   onClose,
   onSaved,
+  todos,
 }: {
   draft: EventDraft;
+  todos: CalendarTodo[];
   onClose: () => void;
   /** with an undo, the calendar offers it in a toast */
   onSaved: (undo?: { message: string; run: () => Promise<Response> }) => void;
@@ -70,12 +107,7 @@ export function EventDialog({
   }
 
   // undoing a delete recreates the entry as it was when the dialog opened (it gets a new id)
-  const restore = () =>
-    request("POST", "/api/events", {
-      ...draft,
-      repeatDays: draft.repeatDays.join(","),
-      skipDates: draft.skipDates.join(","),
-    });
+  const restore = () => request("POST", "/api/events", toBody(draft));
 
   return (
     <Modal open onOpenChange={(open) => !open && onClose()} title={draft.id ? "Edit entry" : "New entry"}>
@@ -83,12 +115,7 @@ export function EventDialog({
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (form.title.trim())
-              send(draft.id ? "PATCH" : "POST", {
-                ...form,
-                repeatDays: form.repeatDays.join(","),
-                skipDates: form.skipDates.join(","),
-              });
+            if (form.title.trim()) send(draft.id ? "PATCH" : "POST", toBody(form));
           }}
           className="flex flex-col gap-3"
         >
@@ -112,7 +139,11 @@ export function EventDialog({
               All day
             </label>
           </div>
-          <div className="flex items-center gap-1">
+          {form.kind === "deep" && (
+            <DeepWorkPanel form={form} update={(fields) => setForm((f) => ({ ...f, ...fields }))} todos={todos} />
+          )}
+          {/* deep work is one-off: one block is one session */}
+          {form.kind !== "deep" && <div className="flex items-center gap-1">
             <span className="mr-2 text-sm text-muted-foreground">Repeat</span>
             <Button
               type="button"
@@ -146,7 +177,7 @@ export function EventDialog({
                 </Button>
               );
             })}
-          </div>
+          </div>}
           <Textarea
             value={form.notes}
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
