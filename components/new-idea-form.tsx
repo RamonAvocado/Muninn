@@ -42,7 +42,7 @@ export function NewIdeaForm() {
         disabled={pending}
       />
       <Button type="submit" disabled={pending} className="self-start">
-        Save idea
+        Save Idea
       </Button>
     </form>
   );

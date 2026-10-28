@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@mimird/ui/components/button";
+import { Hint } from "@mimird/ui/components/tooltip";
 import { Input } from "@mimird/ui/components/input";
 import { Modal } from "@mimird/ui/components/modal";
 import { FolderPlusIcon } from "lucide-react";
@@ -30,9 +31,11 @@ export function NewProjectGroupDialog() {
 
   return (
     <>
-      <Button variant="outline" size="icon" title="New group" onClick={() => setOpen(true)}>
-        <FolderPlusIcon />
-      </Button>
+      <Hint label="New Group">
+        <Button variant="outline" size="icon" aria-label="New group" onClick={() => setOpen(true)}>
+          <FolderPlusIcon />
+        </Button>
+      </Hint>
       <Modal open={open} onOpenChange={setOpen} title="New group">
         <h2 className="font-heading text-base font-medium">New group</h2>
         <form onSubmit={submit} className="flex flex-col gap-3">

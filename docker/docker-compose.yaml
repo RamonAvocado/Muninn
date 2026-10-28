@@ -9,6 +9,9 @@ services:
       - "3002:3000"
     env_file:
       - ../.env
+    environment:
+      # Sign-in (@mimird/auth): SESSION_SECRET and APP_URL come from .env; without the secret it refuses to start.
+      APP_ENV: production
     volumes:
       - ../sqlite.db:/home/bun/app/sqlite.db
     restart: unless-stopped

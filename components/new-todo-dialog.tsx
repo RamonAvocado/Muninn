@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@mimird/ui/components/button";
+import { Hint } from "@mimird/ui/components/tooltip";
 import { Input } from "@mimird/ui/components/input";
 import { Textarea } from "@mimird/ui/components/textarea";
 import { Modal } from "@mimird/ui/components/modal";
@@ -59,9 +60,11 @@ export function NewTodoDialog({ projectId }: { projectId?: string }) {
 
   return (
     <>
-      <Button variant="outline" size="icon" title="New todo" onClick={() => setOpen(true)}>
-        <ListPlusIcon />
-      </Button>
+      <Hint label="New Todo">
+        <Button variant="outline" size="icon" aria-label="New todo" onClick={() => setOpen(true)}>
+          <ListPlusIcon />
+        </Button>
+      </Hint>
       <Modal open={open} onOpenChange={setOpen} title="New todo">
         <h2 className="font-heading text-base font-medium">New todo</h2>
         <form onSubmit={submit} className="flex flex-col gap-3">

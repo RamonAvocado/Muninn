@@ -1,209 +1,75 @@
-# Muninn design
+---
+name: Muninn
+slogan: What was thought
+surface: web
+theme: system
+base: Mimird-Web/DESIGN.md
+colors:
+  canvas: "#ffffff / #0a0a0a"
+  surface: "#ffffff / #0f0f10"
+  text: "#0a0a0a / #fafafa"
+  text-muted: "#52525b / #a1a1aa"
+  brand: "#7a0e1a / #e8a3ab"
+  destructive: "#e5484d / #ef4444"
+typography:
+  sans: Geist
+  mono: Geist Mono
+radius:
+  base: 10px
+spacing:
+  unit: 4px
+---
 
-How Muninn looks and why. This describes the UI as it exists in the code today, with pointers to the source of each decision. Read it before adding or changing UI.
+# Muninn Design System
 
-- [Feeling](#feeling)
-- [Stack](#stack)
-- [Tokens](#tokens)
-- [Color palette](#color-palette)
-- [Components](#components)
-- [Conventions for new UI](#conventions-for-new-ui)
+Muninn uses the Mimird design system. **[Mimird-Web/DESIGN.md](../Mimird-Web/DESIGN.md) is the base**: its rules for type, spacing, radius, motion, components, accessibility and code all apply here. This file has the same structure and records only what Muninn does differently or adds. If a section below says nothing about something, follow Mimird.
 
-## Feeling
+When this file and the code disagree, this file is right and the code has drifted. Known drift is listed in [section 14](#14-open-decisions-and-known-drift).
 
-Muninn is named after Odin's raven of memory, and the mark is the Mimird icon recolored crimson (`public/brand/mimird-icon-{black,white}.svg`): the black-ring one on light, the white-ring one on dark. It shares its shell with Skuld and Hermod. It is a personal notebook for todos and ideas, and the UI is meant to feel like one: quiet, fast, and out of the way.
+---
 
-**Monochrome first, one light.** Every theme token is a pure grey (zero chroma) except `brand`, which is crimson (`#7a0e1a` light, `#e8a3ab` dark, both from the mark). Crimson appears only on the active sidebar icon, links (`.link-subtle`), focus rings, text selection, the calendar's now-line, pressed toggles and the `Switch`. Otherwise color only appears when it carries meaning: a project's accent dot, a label's dot, or a destructive action. Nothing is colored for decoration.
+## 1. The feeling
 
-**Flat.** Surfaces are separated by a 1px ring (`ring-1 ring-foreground/10`) or a hairline border, not by shadows. The only shadow in the app is the select popup (`shadow-md`), because it floats over content.
+Muninn is named after Odin's raven of memory. It is a personal notebook for todos, ideas and time: what is open, what got done, and where the hours went. Where Mimird is the inside of a watch, Muninn is **a notebook**: quiet, fast and out of the way.
 
-**Compact.** Controls are 32px tall, body text is `text-sm`, and every page is a single centered column (`max-w-3xl`). The app should show a lot of todos without feeling cramped.
+- **Monochrome first, one light.** Every surface and text token is neutral. The one saturated color is crimson, used the way Mimird uses blue.
+- **Flat.** App cards keep a flat ring (Mimird 6.3). Only things that float get a shadow: the sidebar, menus, dialogs and toasts.
+- **Compact.** 32px controls, `text-sm` body, one centered column per page. A lot of todos fit on a screen without feeling cramped.
+- **Immediate.** Checking a todo updates optimistically. Adding a todo is an always-visible inline field, not a modal. Settings save on blur or on pick, with no Save button.
+- **Plain-spoken.** Empty states are one short muted sentence: "Nothing pending.", "Nothing done yet.", "No ideas yet." There are no illustrations and no onboarding copy.
 
-**Immediate.** Transitions run 100 to 200ms. Checking a todo updates optimistically. Adding a todo is an always-visible inline field, not a modal. Settings save on blur or on pick, with no Save button.
+Mimird's five tests (caseback, one-light, bevel, patience, proof) apply as written, with crimson in place of blue.
 
-**Plain-spoken.** Empty states are one short muted sentence: "Nothing pending.", "Nothing done yet.", "No ideas yet." No illustrations, no exclamation marks, no onboarding copy.
+---
 
-## Stack
+## 2. Brand
 
-| Concern | Choice | Where |
-| --- | --- | --- |
-| Styling | Tailwind CSS v4, CSS-first (no `tailwind.config`) | `app/globals.css` |
-| Component source | `@mimird/ui`, shared with Skuld and Hermod; Tailwind scans it via `@source` | `app/globals.css` |
-| Local primitives | shadcn `base-nova`, only where Mimird has no match (checkbox, collapsible) | `components/ui/*` |
-| Headless primitives | `@base-ui/react` (Base UI, not Radix) | `components/ui/*` |
-| Variants | `class-variance-authority` | `button.tsx`, `badge.tsx` |
-| Class merging | `cn` from `@mimird/ui/lib/utils` | everywhere |
-| Icons | `lucide-react` | everywhere |
-| Animation utilities | `tw-animate-css` | `app/globals.css` |
-| Theming | `next-themes`, `attribute="class"`, default `system`, `disableTransitionOnChange` | `app/layout.tsx` |
-| Toasts | `sonner` | `@mimird/ui/components/sonner` |
-| Calendar | FullCalendar v6 (`timegrid`, `daygrid`, `interaction`), themed through `--fc-*` variables | `components/calendar-view.tsx` |
+- **Muninn**, always capitalised, `translate="no"` on the wordmark.
+- **Logo.** The Mimird mark (`public/brand/mimird-icon-{black,white}.svg`): black on light, white on dark. *Deviation:* Mimird says never to recolor the mark. Muninn's mark is the Mimird icon recolored crimson, which sets the product apart inside the ecosystem.
+- **Voice.** The same as Mimird: direct, calm, full stops. Button labels are Title Case ("New Project", "Save Idea", "Delete Project"), with short prepositions lowercase ("Sync with GitHub"); everything else is sentence case.
 
-## Tokens
+---
 
-All tokens live in `app/globals.css`, in two layers:
+## 3. Colour
 
-1. **Raw variables** on `:root` (light) and `.dark` (dark), such as `--background` and `--radius`.
-2. **Tailwind mapping** in `@theme inline`, which exposes them as utilities: `--color-background: var(--background)` gives `bg-background`, `--radius-lg: var(--radius)` gives `rounded-lg`, and so on.
+All neutrals, `destructive`, the radius scale and the shadcn mapping come from `@mimird/ui/tokens.css`. `app/globals.css` overrides only the following.
 
-Dark mode is class-based: `@custom-variant dark (&:is(.dark *))`. The base layer applies `border-border outline-ring/50` to every element and `bg-background text-foreground` to `body`, so borders and outlines pick up the theme with no extra classes.
+### 3.1 Brand (the light)
 
-### Color tokens
-
-Values are OKLCH. `L` alone means `oklch(L 0 0)`, a pure grey.
-
-| Token | Light | Dark | Used for |
+| Token | Light | Dark | Use |
 | --- | --- | --- | --- |
-| `background` | 1 | 0.145 | Page background |
-| `foreground` | 0.145 | 0.985 | Default text |
-| `card` | 1 | 0.205 | Card surface |
-| `card-foreground` | 0.145 | 0.985 | Text on cards |
-| `popover` | 1 | 0.205 | Dialogs, select popup, toasts |
-| `popover-foreground` | 0.145 | 0.985 | Text on popovers |
-| `primary` | 0.205 | 0.922 | Default button, checked checkbox, drop-target ring |
-| `primary-foreground` | 0.985 | 0.205 | Text and icons on primary |
-| `secondary` | 0.97 | 0.269 | Secondary badge (labels, repo name) |
-| `secondary-foreground` | 0.205 | 0.985 | Text on secondary |
-| `muted` | 0.97 | 0.269 | Hover fills, card and dialog footer bars (at 50%) |
-| `muted-foreground` | 0.556 | 0.708 | Secondary text, empty states, done items, placeholder |
-| `accent` | 0.97 | 0.269 | Focused select item, selected row in the label picker |
-| `accent-foreground` | 0.205 | 0.985 | Text on accent |
-| `destructive` | `0.577 0.245 27.325` | `0.704 0.191 22.216` | Delete project button, error text, invalid fields |
-| `border` | 0.922 | white at 10% | Hairlines and dividers |
-| `input` | 0.922 | white at 15% | Field and checkbox borders, dark field fill (at 30%) |
-| `ring` | `brand` | `brand` | Focus ring (at 50%) and focus border |
-| `brand` | `#7a0e1a` | `#e8a3ab` | The one light; see Feeling |
-| `elev-floating` | soft drop | inset highlight + deeper drop | `shadow-floating`, used by `Modal` |
-| `sidebar` | 0.985 | 0.205 | Sidebar surface |
-| `sidebar-foreground` | 0.145 | 0.985 | Sidebar text (inactive items use it at 70%) |
-| `sidebar-accent` | 0.97 | 0.269 | Active and hovered nav item, active theme button |
-| `sidebar-accent-foreground` | 0.205 | 0.985 | Text on the above |
-| `sidebar-border` | 0.922 | white at 10% | Sidebar right edge |
-| `sidebar-primary` | 0.205 | `0.488 0.243 264.376` | Defined, unused |
-| `sidebar-primary-foreground` | 0.985 | 0.985 | Defined, unused |
-| `sidebar-ring` | `brand` | `brand` | Defined, unused |
-| `chart-1` to `chart-5` | 0.87, 0.556, 0.439, 0.371, 0.269 | same | Defined, unused (no charts yet) |
+| `--brand` | `#7a0e1a` | `#e8a3ab` | Active sidebar icon, `.link-subtle`, selection (at 28%), the calendar's now-line, the deep-work stripe, `Switch` |
+| `--ring`, `--sidebar-ring` | `#7a0e1a` | `#e8a3ab` | Focus rings |
 
-Things worth knowing:
+Both values come from the mark. Muninn has no hero light, so it has no `--brand-deep`.
 
-- `secondary`, `muted` and `accent` are the same grey in each theme. They are three names for one fill; pick the name by intent (static chip, quiet hover, selection).
-- In dark mode, `border` and `input` are translucent white, not solid greys, so hairlines stay visible on both the page (0.145) and raised surfaces (0.205).
-- Light mode has no elevation steps: page, card and popover are all white, and the ring does the separating. Dark mode raises cards, popovers and the sidebar one step (0.145 to 0.205).
-- `destructive` is used as a tint, never a solid fill: `bg-destructive/10 text-destructive` (20% in dark).
-- The only chromatic theme token besides `destructive` is the dark `sidebar-primary` blue, a shadcn default that nothing references.
+### 3.2 Surfaces
 
-### Radius
+Muninn takes the package's neutrals unchanged. *Deviation:* it does not use Mimird-Web's cold dark overrides (`#07080a`, `#101111`, `#252829`). Those still live in Mimird-Web's own `globals.css` rather than in the package (see Mimird section 14). Light and dark are equal themes, and `system` is the default.
 
-One base value, `--radius: 0.625rem` (10px), and a derived scale:
+### 3.3 Project accents (data, not theme)
 
-| Utility | Formula | Size | Used by |
-| --- | --- | --- | --- |
-| `rounded-sm` | `× 0.6` | 6px | Rows in the label picker |
-| `rounded-md` | `× 0.8` | 8px | Sidebar nav items, theme buttons, select items, `xs`/`sm` buttons |
-| `rounded-lg` | `× 1` | 10px | Buttons, inputs, textarea, select trigger and popup |
-| `rounded-xl` | `× 1.4` | 14px | Cards, dialogs |
-| `rounded-2xl` | `× 1.8` | 18px | Unused |
-| `rounded-3xl` | `× 2.2` | 22px | Unused |
-| `rounded-4xl` | `× 2.6` | 26px | Badges (reads as a pill at 20px tall) |
-| `rounded-full` | | | Accent and label dots, swatches |
-
-The checkbox is the one fixed exception at `rounded-[4px]`. Toasts take `--radius` directly.
-
-### Typography
-
-| Role | Font | Variable |
-| --- | --- | --- |
-| Body and headings | Plus Jakarta Sans | `--font-sans`, also aliased as `--font-heading` |
-| Monospace | Geist Mono | `--font-geist-mono`, exposed as `font-mono` (loaded, not used yet) |
-
-Both are loaded with `next/font/google` in `app/layout.tsx`, and `html` gets `antialiased`.
-
-The type scale in use is small on purpose:
-
-| Use | Classes |
-| --- | --- |
-| Page title (`h1`) | `text-xl font-semibold` |
-| Card title, dialog title, wordmark | `font-heading text-base font-medium` (wordmark is `font-semibold`) |
-| Body, rows, descriptions, nav | `text-sm` (nav and section labels add `font-medium`) |
-| Badges, issue numbers | `text-xs` (badges add `font-medium`) |
-| Inputs and textareas | `text-base` on mobile, `md:text-sm` (avoids iOS zoom on focus) |
-
-Hierarchy comes from weight and from `text-muted-foreground`, not from size. Done items are `line-through text-muted-foreground`.
-
-### Spacing and layout
-
-Shell (`app/layout.tsx`, `components/sidebar.tsx`):
-
-- `body` is a flex row: sidebar, then `main`.
-- Sidebar: `w-60` open, `w-16` collapsed, `h-screen`, sticky, with a `h-16` header row. Width animates over 200ms.
-- Main: `p-8`, scrolls on its own, content centered at `max-w-3xl`.
-
-Rhythm inside a page:
-
-| Gap | Where |
-| --- | --- |
-| `gap-6` | Between page sections (header, cards) |
-| `gap-4` | Dialog content, groups inside the settings dialog |
-| `gap-3` | Rows inside a todo card, forms, project list |
-| `gap-2` | Elements within a row, button groups, read-only lists |
-| `gap-1` | Nav items, badges in a row, chevron and label |
-
-Card padding is a single variable, `--card-spacing`: 16px by default, 12px with `size="sm"`. It drives the card's vertical padding, its inner gap and the horizontal padding of every slot. Dialogs use `p-4`.
-
-### Control sizes
-
-| Size | Height | Notes |
-| --- | --- | --- |
-| `xs` | 24px | `text-xs`, 12px icons |
-| `sm` | 28px | 0.8rem text, 14px icons |
-| `default` | 32px | Buttons, inputs, select trigger |
-| `lg` | 36px | |
-| `icon`, `icon-xs`, `icon-sm`, `icon-lg` | square at the matching height | |
-
-Icons default to `size-4` (16px). Chevrons and the back arrow are `size-3.5`. Checkboxes are 16px with an invisible larger hit area (`after:-inset-x-3 after:-inset-y-2`).
-
-### States and motion
-
-| State | Treatment |
-| --- | --- |
-| Hover | A `muted` fill (`hover:bg-muted`, or `/50` on cards), or an underline for text links |
-| Focus | `focus-visible:border-ring` plus `ring-3 ring-ring/50` |
-| Pressed | Buttons shift down 1px (`active:translate-y-px`) |
-| Disabled | `opacity-50`, pointer events off |
-| Invalid | `border-destructive` plus `ring-3 ring-destructive/20` (40% in dark) |
-| Pending | Control disabled, its icon gets `animate-spin` |
-| Drop target | `ring-2 ring-primary bg-muted/50` |
-
-Motion is short and functional: dialogs and popups fade and zoom from 95% in 100ms, the checkbox tick scales in over 150ms, the sidebar width takes 200ms, and disclosure chevrons rotate 90 degrees. Theme switches do not animate.
-
-## Color palette
-
-### Neutrals
-
-Nine grey steps cover every surface and text color:
-
-| OKLCH L | Light theme role | Dark theme role |
-| --- | --- | --- |
-| 1 | Background, card, popover | Border and input (at 10% and 15% alpha) |
-| 0.985 | Sidebar, text on primary | Foreground |
-| 0.97 | Secondary, muted, accent | |
-| 0.922 | Border, input | Primary |
-| 0.708 | Ring | Muted foreground |
-| 0.556 | Muted foreground | Ring |
-| 0.269 | | Secondary, muted, accent |
-| 0.205 | Primary | Card, popover, sidebar, text on primary |
-| 0.145 | Foreground | Background |
-
-### Destructive
-
-| Theme | Value |
-| --- | --- |
-| Light | `oklch(0.577 0.245 27.325)` |
-| Dark | `oklch(0.704 0.191 22.216)` |
-
-### Project accents
-
-Defined in `lib/project-accents.ts`. A project stores the key (or nothing); the hex is looked up at render time.
+Defined in `lib/project-accents.ts`. A project stores the key (or nothing); the hex is looked up at render time and applied with inline `style`.
 
 | Key | Hex |
 | --- | --- |
@@ -216,65 +82,96 @@ Defined in `lib/project-accents.ts`. A project stores the key (or nothing); the 
 | `violet` | `#8b5cf6` |
 | `pink` | `#ec4899` |
 
-These are the Tailwind 500 shades. An accent is only ever shown as a dot: 8px before the name on a project card, 10px before the project page title, and 24px swatches in the settings picker. The selected swatch gets a 2px halo in its own color, and "no accent" is a dashed empty circle.
+These are the Tailwind 500 shades, the same in both themes. An accent is only ever a dot: 8px before the name on a project card, 10px before the project page title, and 24px swatches in the settings picker. The selected swatch gets a 2px halo in its own color, and "no accent" is a dashed empty circle. A project's accent also tints its calendar blocks.
 
-### Label colors
+### 3.4 Label colours (data, not theme)
 
-Labels carry an optional hex color stored without the `#`. They are user-defined or synced from GitHub. The defaults in `lib/default-labels.ts` mirror GitHub's:
+Labels carry an optional hex stored without the `#`, user-defined or synced from GitHub. The defaults in `lib/default-labels.ts` mirror GitHub's (`bug` `d73a4a`, `documentation` `0075ca`, `enhancement` `a2eeef`, …).
 
-| Label | Hex |
+A label color is a dot inside a neutral `secondary` badge (8px) or a 20px circle in the label picker. Badges are never filled with the label color, which keeps contrast independent of whatever GitHub hands back. Labels on todo rows are plain `secondary` badges with no dot.
+
+### 3.5 Calendar
+
+FullCalendar is mapped onto the tokens through its `--fc-*` variables in `app/globals.css`. Blocks are `muted` with a `border` edge unless a project accent colors them; notes are dashed and transparent; deep-work blocks carry a 4px `brand` stripe on the left; sleep is transparent at 60%; done entries are struck through.
+
+---
+
+## 4. Typography
+
+The same as Mimird: **Geist** for everything and **Geist Mono** for literal text, loaded in `app/layout.tsx` as `--font-geist-sans` / `--font-geist-mono` (the names `tokens.css` reads). The body sets `font-feature-settings: "cv11", "ss01"`.
+
+Muninn uses the app end of Mimird's scale only:
+
+| Use | Classes |
 | --- | --- |
-| bug | `d73a4a` |
-| documentation | `0075ca` |
-| duplicate | `cfd3d7` |
-| enhancement | `a2eeef` |
-| good first issue | `7057ff` |
-| help wanted | `008672` |
-| invalid | `e4e669` |
-| question | `d876e3` |
-| wontfix | `ffffff` |
+| Page title (`h1`) | `text-xl font-semibold` |
+| Card and dialog title | `font-heading text-base font-medium` |
+| Body, rows, nav | `text-sm` (section labels in dialogs add `font-medium`) |
+| Badges, issue numbers | `text-xs` |
 
-A label color is shown as a dot inside a neutral `secondary` badge (8px) or as a 20px circle in the label picker. Badges are never filled with the label color, which keeps text contrast independent of whatever color GitHub hands back. Labels on todo rows are plain `secondary` badges with no dot.
+Done items are `line-through text-muted-foreground`. Every changing number (deep-work stats, counts) is `tabular-nums`.
 
-### The rule for color
+---
 
-Accent and label colors are **data, not theme**. They are applied with inline `style`, they sit outside the token system, and they are identical in light and dark. Everything else uses a semantic token.
+## 5. Space and shape
 
-## Components
+- Spacing and radius are Mimird's (4px unit; `rounded-sm` 6 → `rounded-2xl` 18).
+- **Layout.** *Deviation:* every page is one centered `max-w-3xl` column, instead of Mimird's widening app container. A todo list reads best narrow. A page that needs the full width (the calendar) marks its root `data-wide`, and the shell drops the cap.
+- Page gutter `px-4 py-6 sm:px-6 lg:px-8` (`components/app-shell.tsx`).
+- Rhythm: `gap-6` between page sections, `gap-4` inside dialogs, `gap-3` for rows in a card, forms and the project list, `gap-2` within a row, and `gap-1` between nav items and badges.
 
-### Primitives (`@mimird/ui`, plus `components/ui/`)
+---
 
-`Button`, `Badge`, `Card`, `Input`, `Textarea`, `Modal`, `MenuSelect`, `Switch` and `Toaster` come from `@mimird/ui/components/*`. Only `Checkbox` and `Collapsible` are local shadcn (`base-nova`) files, because Mimird has no equivalent.
+## 6. Depth and elevation
 
-| Component | Variants and sizes | Notes |
+The same three tokens as Mimird (`shadow-card`, `shadow-raised`, `shadow-floating`) and `.surface-glass`, defined in `app/globals.css`. Following Mimird 6.3, app cards stay flat (`ring-1 ring-foreground/10`), and only the sidebar, menus, dialogs and toasts float.
+
+---
+
+## 7. Motion
+
+Mimird's rules, unchanged. The places motion carries information in Muninn:
+
+| Place | Motion | What it tells |
 | --- | --- | --- |
-| `Button` | Variants: `default`, `outline`, `secondary`, `ghost`, `destructive`, `link`. Sizes: `default`, `xs`, `sm`, `lg`, `icon`, `icon-xs`, `icon-sm`, `icon-lg` | `default` is the one solid, high-contrast element on a page |
-| `Badge` | `default`, `secondary`, `destructive`, `outline`, `ghost`, `link` | 20px pill. The app only uses `secondary` |
-| `Card` | `size`: `default`, `sm`. Slots: `CardHeader`, `CardTitle`, `CardDescription`, `CardAction`, `CardContent`, `CardFooter` | Ring instead of border or shadow. Footer is a `bg-muted/50` bar with a top border |
-| `Checkbox` | | 16px, fills with `primary` when checked |
-| `Collapsible` | `Collapsible`, `CollapsibleTrigger`, `CollapsiblePanel` | Unstyled apart from `overflow-hidden` |
-| `Modal` | Controlled: `open`, `onOpenChange`, `title` (screen readers only) | `max-w-md` popup with `shadow-floating`. Dialogs put an `h2` (`font-heading text-base font-medium`) first and end with a `flex justify-end gap-2` button row |
-| `Input` | | 32px, transparent in light, `bg-input/30` in dark |
-| `Textarea` | | Auto-grows with `field-sizing-content`, `min-h-16` |
-| `MenuSelect` | `value`, `options`, `onValueChange` | Select built on Mimird's dropdown menu |
-| `Switch` | Native checkbox, `checked` / `onChange` | Fills with `brand` when on |
-| `Toaster` | | Sonner themed from `popover`, `border` and `radius`, with lucide status icons |
+| Done list, ideas with a body | The chevron turns 90° | That the row opened |
+| Sync, push to GitHub, delete | The button loads (`<Button loading>`) | That the request is running |
+| Dragging a project onto a group | The group gets `ring-2 ring-primary bg-muted/50` | Where the project will land |
+| Checking a todo | The tick scales in | That it is done, before the server answers |
 
-### App shell
+---
 
-- **`Sidebar`** (`components/sidebar.tsx`). Same structure as Skuld's and Hermod's: logo and wordmark, five nav links (Dashboard, Projects, Calendar, Ideas, Done) and the theme toggle. Active and hovered links get `bg-sidebar-accent`; the active icon turns `text-brand`; inactive ones are `text-muted-foreground`. Collapsing to a 56px rail hides labels and keeps icons with a `title` tooltip; the logo becomes the expand button on hover. State persists in `localStorage` under `muninn-sidebar-collapsed`.
-- **`ThemeToggle`** (`components/theme-toggle.tsx`). Three 28px icon buttons for light, dark and system. The active one takes the nav item's active style. Stacks vertically when the sidebar is collapsed.
+## 8. Atmosphere and imagery
 
-### Feature components (`components/`)
+None. Muninn has no marketing pages, so no hero light, no stone and no imagery. The logo is the only brand mark.
+
+---
+
+## 9. Components
+
+Every primitive comes from `@mimird/ui/components/*`, and the account UI comes from `@mimird/auth`. The only local primitives are `components/ui/checkbox.tsx` and `components/ui/collapsible.tsx` (shadcn `base-nova`), because the package has no equivalent yet; a new missing primitive goes into the package (`Mimird-packages/packages/ui`), not here. Feature components go flat in `components/`.
+
+### 9.1 App shell (`components/app-shell.tsx`, `app/(app)/layout.tsx`)
+
+- **Sidebar.** `Sidebar` from `@mimird/ui/components/sidebar` (Mimird 9.18): a floating glass panel with the logo and wordmark as `title` and the mark alone as `mark`. Entries are `SidebarItem`s: Dashboard (`LayoutDashboard`), Projects (`Boxes`), Calendar (`CalendarDays`), Ideas (`Lightbulb`), Done (`CheckCircle2`). A section stays active on its sub-pages. The collapsed state is the `muninn_sidebar` cookie, read on the server.
+- **Footer.** `UserMenu` from `@mimird/auth/account/user-menu`, with Profile and Settings items.
+- **Account dialog.** `SettingsDialog` from `@mimird/auth`, with `ProfileSection` and `AppearanceSection`, opened on `#settings/profile` and `#settings/appearance` (as in Mimird). The theme is picked there; there is no separate theme toggle.
+- **Mobile.** Below `lg`, a header with a `Sheet` holding the same nav and the account menu.
+
+### 9.2 Auth
+
+`@mimird/auth` pages behind `app/(auth)/[step]/page.tsx`, with `AuthShell brand="Muninn"`. Users live in Muninn's SQLite (`kv` table in `db/schema.ts`, `kvStore` in `instrumentation.ts`). Cookies use the `muninn` prefix (`next.config.ts`), so other ecosystem apps on the same host never share Muninn's session. `proxy.ts` redirects signed-out visitors from every page and answers a signed-out call to `/api/*` (except `/api/auth/*`) with a 401; `requireUser()` in `app/(app)/layout.tsx` does the real check for pages. `bun run db:seed-user` creates a verified test account.
+
+### 9.3 Feature components
 
 **Todos**
 
 | Component | What it is |
 | --- | --- |
 | `QuickAddTodo` | Inline input plus an "Add" button at the top of a todo card |
-| `NewTodoDialog` | Outline icon button opening the full form: title, description and a scrollable label picker (rows highlight with `accent`, the color circle shows an X when selected) |
+| `NewTodoDialog` | Outline icon button opening the full form: title, description and a scrollable label picker |
 | `TodoCheckbox` | Checkbox that flips immediately and disables itself while the request runs |
-| `TodoTitle` | The title is a text button (underline on hover) that opens a dialog to edit the description |
+| `TodoTitle` | The title is a text button that opens a dialog to edit the description |
 | `DoneCollection` | Collapsible "N done" list, open by default only when there are 5 or fewer |
 | `DeleteButton` | Ghost icon button with an X; deletes with no confirmation |
 | `PushIssueButton` | Ghost `icon-sm` button that creates a GitHub issue from a manual todo |
@@ -283,48 +180,80 @@ Accent and label colors are **data, not theme**. They are applied with inline `s
 
 | Component | What it is |
 | --- | --- |
-| `ProjectCard` | Clickable card: accent dot, name, repo badge, and a remove-from-group icon that appears on hover |
-| `ProjectGroupCard` | Clickable card with a muted folder icon; shows the drop-target ring while a project is dragged over it |
-| `ProjectList` | Vertical list of both, reordered with native HTML drag and drop (`cursor-grab`). Dropping a project on a group moves it in |
-| `ProjectSettingsDialog` | Modal with stacked sections, each headed by a `text-sm font-medium` label: Accent, Group, GitHub, Labels. "Delete project" sits in the footer as the destructive button |
-| `NewProjectDialog` | The page's primary button, "New project" |
-| `NewProjectGroupDialog` | Outline icon button, "New group" |
+| `ProjectCard` | Clickable card: accent dot, name, repo badge, and a remove-from-group icon that appears on hover or focus |
+| `ProjectGroupCard` | Clickable card with a muted folder icon; the drop target while a project is dragged |
+| `ProjectList` | Both, reordered with native HTML drag and drop |
+| `ProjectSettingsDialog` | Modal with stacked sections (Accent, Group, GitHub, Labels). "Delete Project" sits at the bottom and asks through `ConfirmDialog` |
+| `NewProjectDialog` | The page's primary button, "New Project" |
+| `NewProjectGroupDialog` | Outline icon button, "New Group" |
 
-**Labels**
-
-| Component | What it is |
-| --- | --- |
-| `LabelManager` | Wrapping row of removable label badges above a name, hex and add form. Used for both personal and project labels |
-| `ProjectLabelsSection` | `LabelManager` for a project, with the sync button when a repo is connected |
-| `PersonalLabelsDialog` | "My labels" outline button opening a `LabelManager` |
-| `SyncLabelsButton` | Small outline button, "Sync from GitHub" |
-
-**Ideas and sync**
+**Labels, ideas, sync, calendar**
 
 | Component | What it is |
 | --- | --- |
-| `NewIdeaForm` | Title input, details textarea, "Save idea" button |
-| `IdeaItem` | A plain line, or a collapsible with a chevron when the idea has a body |
-| `SyncButton` | Outline button with a refresh icon, "Sync with GitHub" |
+| `LabelManager` | Removable label badges above a name, hex and add form. Used for personal and project labels |
+| `PersonalLabelsDialog` | "My Labels" outline button opening a `LabelManager` |
+| `SyncButton`, `SyncLabelsButton` | Outline buttons that load while syncing with GitHub |
+| `NewIdeaForm`, `IdeaItem` | Title, details and "Save Idea"; an idea is a plain line, or a collapsible when it has a body |
+| `CalendarView`, `EventDialog` | FullCalendar time grid and the entry dialog (blocks, notes, repeats, deep work) |
+| `DeepWorkPanel` | Deep-work fields in the entry dialog: linked todos and an interruption counter |
 
-### Recurring patterns
+### 9.4 Recurring patterns
 
-- **Page header.** `h1` on the left, actions on the right, in a `flex items-center justify-between` row. Only one action per page is a solid `default` button; the rest are `outline`.
-- **Section as card.** Each list on a page is a `Card` with a `CardTitle` ("Open", "Done", "Life todos").
-- **Todo row.** `flex items-center gap-2`: checkbox, title (`flex-1`), label badges, issue link (`#12`, `text-xs`, muted, underlined), then icon actions.
-- **Read-only row.** `flex justify-between text-sm`: struck-through title on the left, project name (or "Life") on the right, both muted.
+- **Page header.** `h1` left, actions right. One solid button per view; the rest are `outline` or `ghost`.
+- **Section as card.** Each list on a page is a flat `Card` with a `CardTitle` ("Open", "Done", "Life todos").
+- **Todo row.** `flex items-center gap-2`: checkbox, title (`flex-1`), label badges, issue link (`#12`, `text-xs`, muted), then icon actions.
 - **Back link.** Muted `text-sm` link with a small left arrow above the page title on nested pages.
-- **Icon-only actions.** `ghost` inside rows, `outline` in headers, always with a `title`.
-- **Async feedback.** The control disables and its icon spins; the result is a sonner toast (`toast.success` or `toast.error`). Errors that belong to a field are shown inline as `text-sm text-destructive`.
-- **Destructive actions.** Tinted, never solid. Deleting a project asks through the native `confirm()`.
+- **Icon-only actions.** `ghost` in rows, `outline` in headers, with an `aria-label`, inside a `Hint`. Never the native `title`.
+- **Async feedback.** The button takes `loading`; the result is a sonner toast. Field errors show inline as `text-sm text-destructive`.
+- **Destructive actions.** Tinted, never solid. Irreversible ones (deleting a project) ask through `ConfirmDialog`, never `confirm()`.
 
-## Conventions for new UI
+---
 
-- Use semantic tokens (`bg-muted`, `text-muted-foreground`, `border-border`). Do not write raw colors, with one exception: accent and label colors from data, applied through inline `style`.
-- Reach for `@mimird/ui` first, then an existing local primitive. Only if neither has it, add one with shadcn so it lands in `components/ui/` in the `base-nova` style; feature components go flat in `components/`.
-- Stay on the scale: 32px controls, the radius steps above, `text-sm` body, 16px lucide icons.
-- Separate surfaces with the ring or a border. Add a shadow only to something that floats.
-- Keep pages to the single `max-w-3xl` column, built from the page header and section cards. A page that needs the full width (the calendar) marks its root `data-wide`.
-- One solid button per view.
-- Write empty states as one short muted sentence.
-- Check both themes; remember that light mode has no surface steps to lean on.
+## 10. Accessibility
+
+Mimird's rules. Add-ons for Muninn: a "Skip to content" link targets `#main` in the root layout, every icon-only control has an `aria-label`, and hover-revealed controls also show on `focus-visible`.
+
+---
+
+## 11. Do and don't
+
+**Do:** start from neutral surfaces; use crimson once or twice per view; keep pages to the `max-w-3xl` column of a page header and section cards; show accent and label colors only as dots.
+
+**Don't:** fill a badge with a label color; write raw colors in components (accent and label colors from data are the exception); add a shadow to a resting card; use the native `title` or `confirm()`.
+
+---
+
+## 12. Implementation
+
+Stack: Next.js 16 (App Router), React 19, Tailwind v4, `@mimird/ui` and `@mimird/auth`, Drizzle on libSQL, FullCalendar v6.
+
+| What | Where |
+| --- | --- |
+| Base tokens | `@mimird/ui/tokens.css` |
+| Crimson, elevation, `.surface-glass`, `.link-subtle`, FullCalendar mapping | `app/globals.css` |
+| Fonts, theme provider, toaster | `app/layout.tsx` |
+| Shell, auth gate | `components/app-shell.tsx`, `app/(app)/layout.tsx`, `proxy.ts` |
+| Auth store | `db/schema.ts` (`kv`), `db/index.ts`, `instrumentation.ts` |
+| Test user | `scripts/seed-user.ts` |
+| Project accents | `lib/project-accents.ts` |
+
+The code rules are Mimird 12.3: no raw values in components, keep shadcn variable names, theme with variables rather than `dark:` forks, and compose rather than fork shared components.
+
+---
+
+## 13. Prompt guide for agents
+
+- "One `max-w-3xl` column: an `h1` with one solid action on the right, then flat section `Card`s."
+- "Primitives from `@mimird/ui/components/*`; icon buttons are `ghost` inside a `Hint`."
+- "Accent and label colors are dots, applied with inline `style`."
+- "Crimson only on the active nav icon, links, focus and the calendar's now-line."
+
+---
+
+## 14. Open decisions and known drift
+
+- **Cold dark neutrals.** Mimird-Web's dark palette is an app-level override, not in `tokens.css`. When it moves into the package (Mimird section 14), Muninn picks it up for free.
+- **Local checkbox and collapsible.** They should move into `@mimird/ui`; until then they live in `components/ui/`.
+- **Email.** No `sendEmail` is configured, so sign-up and reset codes only print to the server log. Production needs one (see `home/instrumentation.ts` for a Resend example).
+- **Data is not per-user.** Sign-in gates the app, but todos, projects and calendar entries have no owner column: every account sees the same data.

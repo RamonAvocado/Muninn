@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "bun run scripts/migrate.ts"
+    "db:migrate": "bun run scripts/migrate.ts",
+    "db:seed-user": "bun run scripts/seed-user.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -20,7 +21,8 @@
     "@fullcalendar/react": "6.1.21",
     "@fullcalendar/timegrid": "6.1.21",
     "@libsql/client": "^0.18.0",
-    "@mimird/ui": "0.3.1",
+    "@mimird/auth": "0.6.3",
+    "@mimird/ui": "0.5.5",
     "class-variance-authority": "^0.7.1",
     "drizzle-orm": "^0.45.3",
     "lucide-react": "^1.47.0",

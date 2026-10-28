@@ -33,7 +33,7 @@ export function NewProjectDialog({ groupId }: { groupId?: string } = {}) {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>New project</Button>
+      <Button onClick={() => setOpen(true)}>New Project</Button>
       <Modal open={open} onOpenChange={setOpen} title="New project">
         <h2 className="font-heading text-base font-medium">New project</h2>
         <form onSubmit={submit} className="flex flex-col gap-3">

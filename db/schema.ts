@@ -136,3 +136,9 @@ export const projectsRelations = relations(projects, ({ many }) => ({
 export const todosRelations = relations(todos, ({ one }) => ({
   project: one(projects, { fields: [todos.projectId], references: [projects.id] }),
 }));
+
+// Users, sign-in codes and avatars for @mimird/auth's kvStore (instrumentation.ts).
+export const kv = sqliteTable("kv", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+});

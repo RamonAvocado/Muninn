@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle } from "@mimird/ui/components/card";
 import { Badge } from "@mimird/ui/components/badge";
+import { Hint } from "@mimird/ui/components/tooltip";
 import { PROJECT_ACCENTS } from "@/lib/project-accents";
 import { FolderMinusIcon } from "lucide-react";
 
@@ -43,17 +44,19 @@ export function ProjectCard({
             </Badge>
           )}
           {onRemoveFromGroup && (
-            <button
-              type="button"
-              title="Remove from group"
-              onClick={(e) => {
-                e.stopPropagation();
-                onRemoveFromGroup();
-              }}
-              className="text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover/card:opacity-100"
-            >
-              <FolderMinusIcon className="size-4" />
-            </button>
+            <Hint label="Remove from Group">
+              <button
+                type="button"
+                aria-label="Remove from group"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemoveFromGroup();
+                }}
+                className="text-muted-foreground opacity-0 transition-opacity group-hover/card:opacity-100 hover:text-foreground focus-visible:opacity-100"
+              >
+                <FolderMinusIcon className="size-4" />
+              </button>
+            </Hint>
           )}
         </CardTitle>
       </CardHeader>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@mimird/ui/components/button";
+import { Hint } from "@mimird/ui/components/tooltip";
 import { Input } from "@mimird/ui/components/input";
 import { Textarea } from "@mimird/ui/components/textarea";
 import { Modal } from "@mimird/ui/components/modal";
@@ -152,18 +153,17 @@ export function EventDialog({
               className={PRESSED}
               onClick={() => setForm({ ...form, repeatDays: everyDay ? [] : WEEKDAYS.map((w) => w.day) })}
             >
-              Every day
+              Every Day
             </Button>
             {WEEKDAYS.map(({ day, name }) => {
               const on = form.repeatDays.includes(day);
               return (
+                <Hint key={day} label={name}>
                 <Button
-                  key={day}
                   type="button"
                   size="icon"
                   variant="outline"
                   className={PRESSED}
-                  title={name}
                   aria-label={name}
                   aria-pressed={on}
                   onClick={() =>
@@ -175,6 +175,7 @@ export function EventDialog({
                 >
                   {name[0]}
                 </Button>
+                </Hint>
               );
             })}
           </div>}
@@ -201,7 +202,7 @@ export function EventDialog({
                   )
                 }
               >
-                Delete this day
+                Delete This Day
               </Button>
             )}
             {draft.id && (
@@ -213,7 +214,7 @@ export function EventDialog({
                   send("DELETE", undefined, { message: isSeries ? "Series deleted" : "Entry deleted", run: restore })
                 }
               >
-                {isSeries ? "Delete all" : "Delete"}
+                {isSeries ? "Delete All" : "Delete"}
               </Button>
             )}
             <Button type="submit" disabled={pending}>

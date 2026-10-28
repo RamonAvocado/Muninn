@@ -4,6 +4,17 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 The local SQLite database (`sqlite.db`) and its schema are managed with [Drizzle ORM](https://orm.drizzle.team). Migrations run automatically before `dev`/`build`, so no manual DB setup is needed on a fresh clone.
 
+Sign-in comes from `@mimird/auth`, with users stored in the same SQLite file (`kv` table).
+For a ready-made test account run `bun run db:seed-user` (or `make seed-user`): it creates the
+verified user `test@muninn.dev` / `muninn123`. Pass `[email] [password]` for another one.
+You can also sign up at `/signup`; in dev the verification code is printed in the server log.
+Its cookies are `muninn_*` (`AUTH_COOKIE_PREFIX`, set in `next.config.ts`), so other
+@mimird/auth apps on the same host don't share the session. In production set
+`SESSION_SECRET` (32+ chars, different from every other app's) and `APP_URL`. Google/GitHub login is
+optional (`GOOGLE_CLIENT_ID`/`_SECRET`, `GITHUB_CLIENT_ID`/`_SECRET`).
+
+`@mimird/ui` and `@mimird/auth` come from npm, pinned to exact versions.
+
 First, run the development server:
 
 ```bash
@@ -16,7 +27,7 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3002](http://localhost:3002) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

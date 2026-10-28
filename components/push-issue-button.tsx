@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@mimird/ui/components/button";
+import { Hint } from "@mimird/ui/components/tooltip";
 import { UploadCloudIcon } from "lucide-react";
 
 export function PushIssueButton({ todoId }: { todoId: number }) {
@@ -11,11 +12,12 @@ export function PushIssueButton({ todoId }: { todoId: number }) {
   const [pending, setPending] = useState(false);
 
   return (
+    <Hint label="Create GitHub Issue">
     <Button
       variant="ghost"
       size="icon-sm"
-      disabled={pending}
-      title="Create GitHub issue"
+      loading={pending}
+      aria-label="Create GitHub issue"
       onClick={async () => {
         setPending(true);
         const res = await fetch(`/api/todos/${todoId}/push-issue`, { method: "POST" });
@@ -29,7 +31,8 @@ export function PushIssueButton({ todoId }: { todoId: number }) {
         setPending(false);
       }}
     >
-      <UploadCloudIcon className={pending ? "animate-spin" : ""} />
+      <UploadCloudIcon />
     </Button>
+    </Hint>
   );
 }

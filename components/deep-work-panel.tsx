@@ -113,7 +113,8 @@ export function DeepWorkPanel({
         items={todos.filter((t) => t.status === "todo" || form.todoIds.includes(t.id))}
         value={attached}
         onValueChange={(picked) => update({ todoIds: picked.map((t) => t.id) })}
-        itemLabel={(t) => t.title}
+        // SearchSelect keys options by label, so repeated titles get their id
+        itemLabel={(t) => (todos.filter((o) => o.title === t.title).length > 1 ? `${t.title} (#${t.id})` : t.title)}
         itemDescription={(t) => t.projectName ?? "Personal"}
         placeholder="Add todos to work on"
         aria-label="Todos"
@@ -174,7 +175,7 @@ export function DeepWorkPanel({
             className="ml-auto"
             onClick={() => live({ interruptions: form.interruptions + 1 })}
           >
-            +1 interruption
+            +1 Interruption
           </Button>
           <span className="w-6 text-sm tabular-nums" aria-label="Interruptions">
             {form.interruptions}

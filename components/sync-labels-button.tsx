@@ -20,7 +20,7 @@ export function SyncLabelsButton({
     <Button
       variant="outline"
       size="sm"
-      disabled={pending}
+      loading={pending}
       onClick={async () => {
         setPending(true);
         const res = await fetch(`/api/projects/${projectId}/labels/sync`, { method: "POST" });
@@ -35,7 +35,7 @@ export function SyncLabelsButton({
         setPending(false);
       }}
     >
-      <RefreshCwIcon className={pending ? "animate-spin" : ""} />
+      {!pending && <RefreshCwIcon />}
       Sync from GitHub
     </Button>
   );

@@ -12,7 +12,7 @@ export function PersonalLabelsDialog() {
     <>
       <Button variant="outline" onClick={() => setOpen(true)}>
         <TagIcon />
-        My labels
+        My Labels
       </Button>
       <Modal open={open} onOpenChange={setOpen} title="My labels">
         <h2 className="font-heading text-base font-medium">My labels</h2>

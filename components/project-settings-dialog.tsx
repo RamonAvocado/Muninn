@@ -5,7 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@mimird/ui/components/button";
 import { Input } from "@mimird/ui/components/input";
 import { MenuSelect } from "@mimird/ui/components/menu-select";
-import { Modal } from "@mimird/ui/components/modal";
+import { ConfirmDialog, Modal } from "@mimird/ui/components/modal";
+import { Hint } from "@mimird/ui/components/tooltip";
 import { ProjectLabelsSection } from "@/components/project-labels-section";
 import { PROJECT_ACCENTS } from "@/lib/project-accents";
 import { EyeIcon, EyeOffIcon, SettingsIcon } from "lucide-react";
@@ -32,7 +33,7 @@ export function ProjectSettingsDialog({
   const [accent, setAccent] = useState(accentColor);
   const [group, setGroup] = useState(groupId ?? null);
   const [groups, setGroups] = useState<{ id: string; name: string }[]>([]);
-  const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [owner, setOwner] = useState(githubOwner ?? "");
   const [repo, setRepo] = useState(githubRepo ?? "");
   const [token, setToken] = useState("");
@@ -102,8 +103,6 @@ export function ProjectSettingsDialog({
   }
 
   async function deleteProject() {
-    if (!confirm("Delete this project? This also deletes its todos and labels.")) return;
-    setDeleting(true);
     await fetch(`/api/projects/${projectId}`, { method: "DELETE" });
     router.push("/projects");
     router.refresh();
@@ -111,9 +110,11 @@ export function ProjectSettingsDialog({
 
   return (
     <>
-      <Button variant="outline" size="icon" title="Project settings" aria-label="Project settings" onClick={() => setOpen(true)}>
-        <SettingsIcon aria-hidden />
-      </Button>
+      <Hint label="Project Settings">
+        <Button variant="outline" size="icon" aria-label="Project settings" onClick={() => setOpen(true)}>
+          <SettingsIcon aria-hidden />
+        </Button>
+      </Hint>
       <Modal
         open={open}
         onOpenChange={(o) => {
@@ -214,11 +215,18 @@ export function ProjectSettingsDialog({
         </div>
 
         <div className="flex justify-end gap-2">
-          <Button variant="destructive" disabled={deleting} onClick={deleteProject}>
-            Delete project
+          <Button variant="destructive" onClick={() => setConfirmDelete(true)}>
+            Delete Project
           </Button>
         </div>
       </Modal>
+      <ConfirmDialog
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title="Delete this project?"
+        description="This also deletes its todos and labels."
+        onConfirm={deleteProject}
+      />
     </>
   );
 }
